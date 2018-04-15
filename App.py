@@ -5,12 +5,13 @@ from model.featuremcell import FeatureMCell
 import matplotlib.pyplot as plt
 
 def draw(fc):
-    fig, ax = plt.subplots(nrows=2, ncols=5)
+    fig, ax = plt.subplots(nrows=5, ncols=5)
     plt.subplots_adjust(left=0.01, bottom=0.01, right=1, top=1, wspace=0.05, hspace=0.05)
     i = 0
     for row in ax:
         for col in row:
             col.imshow(fc[i].getFeatureImg())
+            fc[i].debug(1)
             i=i+1
     plt.show()
 
@@ -22,7 +23,7 @@ if __name__=="__main__":
 
     sensor = Sensor('EdgeSensor',625)
     fc = []
-    for i in range(0,100):
+    for i in range(0,200):
         fmc = FeatureMCell('FMC'+str(i),sensor)
         fc.append(fmc)
     while True:
@@ -54,8 +55,6 @@ if __name__=="__main__":
         if cv2.waitKey(33) >= 0:
             fcmx = sorted(fc, key=lambda x: x.activeFrq, reverse=True)
             draw(fcmx)
-            names = [(m.name,m.activeFrq) for m in fcmx]
-            print(names)
             break
     
     cv2.destroyAllWindows()

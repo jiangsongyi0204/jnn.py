@@ -44,5 +44,9 @@ class FeatureMCell:
         x = int(np.sqrt(self.sensor.size))
         return np.reshape(imgMap,(x,x))
 
-    def debug(self):
-        print(self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links)))
+    def debug(self,lev=0):
+        d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links))+ ":"
+        if lev>0:
+            for link in self.links:
+                d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'
+        print(d)
