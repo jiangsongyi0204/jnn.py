@@ -13,3 +13,9 @@ https://www.python.org/downloads/windows/
 python -m pip install opencv-python
 
 ```
+
+## Run
+
+```
+python App.py
+```

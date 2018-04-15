@@ -6,7 +6,7 @@ if __name__=="__main__":
     if capture.isOpened() is False:
         raise("IO Error")
     cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
-    f = open('data\image.txt', 'w')
+    f = open('data\output\image.txt', 'w')
     time = 0
     while True:
         time = time + 1;
