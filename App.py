@@ -21,7 +21,7 @@ if __name__=="__main__":
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
-    sensor = Sensor('EdgeSensor',625)
+    sensor = Sensor('EdgeSensor',100)
     fc = []
     for i in range(0,200):
         fmc = FeatureMCell('FMC'+str(i),sensor)
@@ -49,7 +49,7 @@ if __name__=="__main__":
         for fmc in fc:
             sensor.scan(inputData)
             fmc.run()
-            fmc.debug()
+            #fmc.debug()
         #################
  
         if cv2.waitKey(33) >= 0:

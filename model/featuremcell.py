@@ -12,13 +12,15 @@ class FeatureMCell:
         self.status = 0
         self.score = 0.0
         self.activeFrq = 0
+        self.initLinks()
 
+    def initLinks(self):
         sensorSize = self.sensor.size
         posarr = [m for m in range(0,sensorSize)]
-        picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.06))
+        picksize = random.randrange(round(sensorSize*0.07), round(sensorSize*0.1))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
-            link = Link('L'+str(idx),sensor,pos,self)
+            link = Link('L'+str(idx),self.sensor,pos,self)
             self.links.append(link)
     
     def run(self):
@@ -35,6 +37,10 @@ class FeatureMCell:
                     link.downWeight()
                 else:
                     link.upWeight()
+        
+        #remove links
+        newLinks = [item for item in self.links if item.weight > 0]
+        self.links = newLinks
 
     def getFeatureImg(self):
         imgMap = [0.0 for m in range(0,self.sensor.size)]
