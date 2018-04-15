@@ -1,5 +1,7 @@
 import random
 from model.link import Link
+import numpy as np
+import math
 
 class FeatureMCell:
 
@@ -13,7 +15,7 @@ class FeatureMCell:
 
         sensorSize = self.sensor.size
         posarr = [m for m in range(0,sensorSize)]
-        picksize = random.randrange(round(sensorSize*0.02), round(sensorSize*0.05))
+        picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.06))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
             link = Link('L'+str(idx),sensor,pos,self)
@@ -22,7 +24,7 @@ class FeatureMCell:
     def run(self):
         sum = 0.0
         for link in self.links:
-            sum = sum + link.weight * float(self.sensor.inputData[link.pos])
+            sum = sum + link.weight * self.sensor.inputData[link.pos]
         self.score = sum
 
         #20% links active -> featuremcell active
@@ -33,7 +35,14 @@ class FeatureMCell:
                     link.downWeight()
                 else:
                     link.upWeight()
-            
+
+    def getFeatureImg(self):
+        imgMap = [0.0 for m in range(0,self.sensor.size)]
+        for link in self.links:
+            if self.activeFrq > 0:
+                imgMap[link.pos] = link.weight
+        x = int(np.sqrt(self.sensor.size))
+        return np.reshape(imgMap,(x,x))
 
     def debug(self):
         print(self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links)))

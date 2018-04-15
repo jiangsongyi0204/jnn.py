@@ -6,7 +6,7 @@ class Sensor:
         self.inputData = []
 
     def scan(self, data):
-        self.inputData = list(data)
+        self.inputData = [float(m) for m in list(data)]
     
     def debug(self):
         print(self.name + ":" + ''.join(self.inputData))
