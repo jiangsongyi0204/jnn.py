@@ -12,16 +12,16 @@ gif = imageio.mimread('data\input\giphy.gif')
 # convert form RGB to BGR 
 imgs = [img for img in gif]
 
-sensor = Sensor('EdgeSensor',100)
+size = 12
+
+sensor = Sensor('EdgeSensor',int(size*size))
 fc = FeatureColumn('FC',sensor)
 
 for image in imgs:
     cv2.waitKey(1)
     cv2.imshow("Original", image)
-    size = 50
     resize_image = cv2.resize(image,(size,size)) 
     edged_image = cv2.Canny(resize_image,100,150)
-    edged_image = cv2.resize(edged_image,(size,size))
     cv2.imshow('Edges',cv2.resize(edged_image,(200,200)))
 
     #################
@@ -35,7 +35,7 @@ for image in imgs:
 
     sensor.scan(inputData)
     fc.run()
-    #cv2.imshow('Feature1',cv2.resize(fc.getSortedFMC()[0].getFeatureImg(),(200,200)))
+    cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(srt=True),(500,500)))
     #################
 
 fcmx = fc.getSortedFMC()

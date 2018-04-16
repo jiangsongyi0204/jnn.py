@@ -26,7 +26,12 @@ class FeatureColumn:
     def getSortedFMC(self):
         return sorted(self.fmcs, key=lambda x: x.activeFrq, reverse=True)
     
-    def getFeatureMap(self):
+    def getFeatureMap(self,srt=False):
+        if srt == True:
+            fmcs = self.getSortedFMC()
+        else:
+            fmcs = self.fmcs
+
         w = np.sqrt(FeatureColumn.FMC_NUM)
         rowa = []
         ret = []
@@ -38,9 +43,9 @@ class FeatureColumn:
                     else:
                         ret = np.concatenate((ret, rowa), axis=0) 
 
-                rowa = self.fmcs[i].getFeatureImg()
+                rowa = fmcs[i].getFeatureImg(border=True)
             else:
-                rowa = np.concatenate((rowa, self.fmcs[i].getFeatureImg()), axis=1)
+                rowa = np.concatenate((rowa, fmcs[i].getFeatureImg(border=True)), axis=1)
             
         return ret
 

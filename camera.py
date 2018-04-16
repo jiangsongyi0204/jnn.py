@@ -11,7 +11,9 @@ if __name__=="__main__":
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
-    sensor = Sensor('EdgeSensor',100)
+    size = 30
+
+    sensor = Sensor('EdgeSensor', int(size*size))
     fc = FeatureColumn('FC',sensor)
 
     while True:
@@ -19,10 +21,8 @@ if __name__=="__main__":
         if ret == False:
             continue
         cv2.imshow("Original", image)
-        size = 25
         resize_image = cv2.resize(image,(size,size)) 
         edged_image = cv2.Canny(resize_image,100,150)
-        edged_image = cv2.resize(edged_image,(size,size))
         cv2.imshow('Edges',cv2.resize(edged_image,(200,200)))
 
         #################
@@ -37,7 +37,7 @@ if __name__=="__main__":
         sensor.scan(inputData)
         fc.run()
         #################
-        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))
+        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(srt=True),(500,500)))
  
         if cv2.waitKey(33) >= 0:
             fcmx = fc.getSortedFMC()

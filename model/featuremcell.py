@@ -2,6 +2,7 @@ import random
 from model.link import Link
 import numpy as np
 import math
+from lib.helper import Helper
 
 class FeatureMCell:
 
@@ -51,13 +52,16 @@ class FeatureMCell:
         newLinks = [item for item in self.links if item.weight > 0]
         self.links = newLinks
 
-    def getFeatureImg(self):
-        imgMap = [0.0 for m in range(0,self.sensor.size)]
+    def getFeatureImg(self,border=False):
+        imgMap = [0 for m in range(0,self.sensor.size)]
         for link in self.links:
             if self.activeFrq > 0:
                 imgMap[link.pos] = link.weight
         x = int(np.sqrt(self.sensor.size))
-        return np.reshape(imgMap,(x,x))
+        fimg = np.reshape(imgMap,(x,x))
+        if border == True:
+            fimg = np.pad(fimg, 1, Helper.pad_with, padder=10)
+        return fimg
 
     def debug(self,lev=0):
         d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links))+ ":" + ''.join(self.activeHistory) + ":"

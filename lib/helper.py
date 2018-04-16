@@ -12,3 +12,10 @@ class Helper:
                 col.imshow(fc[i].getFeatureImg())
                 i=i+1
         plt.show()
+    
+    @staticmethod
+    def pad_with(vector, pad_width, iaxis, kwargs):
+        pad_value = kwargs.get('padder', 10)
+        vector[:pad_width[0]] = pad_value
+        vector[-pad_width[1]:] = pad_value
+        return vector
