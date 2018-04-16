@@ -11,7 +11,7 @@ if __name__=="__main__":
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
-    size = 30
+    size = 10
 
     sensor = Sensor('EdgeSensor', int(size*size))
     fc = FeatureColumn('FC',sensor)
