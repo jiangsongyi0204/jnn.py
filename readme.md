@@ -5,15 +5,17 @@ Neocortex inspired neural network
 
 OS = windows10
 ```
-
 //install python 3.6
 https://www.python.org/downloads/windows/
 
 //install opencv
-python -m pip install opencv-python
+pip install opencv-python
 
 //install matplot
-python -m pip install matplotlib
+pip install matplotlib
+
+//install imageio
+pip install imageio
 ```
 
 ## Run
