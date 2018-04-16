@@ -21,5 +21,9 @@ pip install imageio
 ## Run
 
 ```
-python App.py
+#Test input data from web camera
+python camera.py
+
+#Test input data from gif images
+python gif.py
 ```
