@@ -13,6 +13,8 @@ class FeatureMCell:
         self.score = 0.0
         self.activeFrq = 0
         self.initLinks()
+        self.predict = []
+        self.activeHistory = []
 
     def initLinks(self):
         sensorSize = self.sensor.size
@@ -31,13 +33,20 @@ class FeatureMCell:
 
         #20% links active -> featuremcell active
         if self.score > len(self.links)*0.2:
+            self.activeHistory.append('1')
             self.activeFrq += 1
             for link in self.links:
                 if self.sensor.inputData[link.pos] == 0:
                     link.downWeight()
                 else:
                     link.upWeight()
-        
+        else:
+            self.activeHistory.append('0')
+
+        #remain the last 10 fire status
+        if len(self.activeHistory) == 10:
+            self.activeHistory.pop(0)
+
         #remove links
         newLinks = [item for item in self.links if item.weight > 0]
         self.links = newLinks
@@ -51,7 +60,7 @@ class FeatureMCell:
         return np.reshape(imgMap,(x,x))
 
     def debug(self,lev=0):
-        d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links))+ ":"
+        d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links))+ ":" + ''.join(self.activeHistory) + ":"
         if lev>0:
             for link in self.links:
                 d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'

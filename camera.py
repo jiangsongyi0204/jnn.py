@@ -2,17 +2,8 @@ import cv2
 import numpy as np
 from model.sensor import Sensor
 from model.featuremcell import FeatureMCell
-import matplotlib.pyplot as plt
-
-def draw(fc):
-    fig, ax = plt.subplots(nrows=2, ncols=5)
-    plt.subplots_adjust(left=0.01, bottom=0.01, right=1, top=1, wspace=0.05, hspace=0.05)
-    i = 0
-    for row in ax:
-        for col in row:
-            col.imshow(fc[i].getFeatureImg())
-            i=i+1
-    plt.show()
+from model.featurecolumn import FeatureColumn
+from lib.helper import Helper
 
 if __name__=="__main__":
     capture = cv2.VideoCapture(0)  
@@ -20,11 +11,9 @@ if __name__=="__main__":
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
-    sensor = Sensor('EdgeSensor',625)
-    fc = []
-    for i in range(0,100):
-        fmc = FeatureMCell('FMC'+str(i),sensor)
-        fc.append(fmc)
+    sensor = Sensor('EdgeSensor',100)
+    fc = FeatureColumn('FC',sensor)
+
     while True:
         ret, image = capture.read()
         if ret == False:
@@ -44,18 +33,15 @@ if __name__=="__main__":
                     inputData += '1'
                 else:
                     inputData += '0'
-        time = 0
-        for fmc in fc:
-            sensor.scan(inputData)
-            fmc.run()
-            fmc.debug()
+
+        sensor.scan(inputData)
+        fc.run()
         #################
+        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))
  
         if cv2.waitKey(33) >= 0:
-            fcmx = sorted(fc, key=lambda x: x.activeFrq, reverse=True)
-            draw(fcmx)
-            names = [(m.name,m.activeFrq) for m in fcmx]
-            print(names)
+            fcmx = fc.getSortedFMC()
+            Helper.draw(fcmx)
             break
     
     cv2.destroyAllWindows()
