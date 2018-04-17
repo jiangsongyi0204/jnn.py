@@ -1,8 +1,8 @@
 import random
-from model.link import Link
 import numpy as np
 import math
 from lib.helper import Helper
+from model.link import Link
 
 class FeatureMCell:
 

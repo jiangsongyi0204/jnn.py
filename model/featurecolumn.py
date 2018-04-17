@@ -1,7 +1,7 @@
 import random
-from model.featuremcell import FeatureMCell
 import numpy as np
 import math
+from model.featuremcell import FeatureMCell
 
 class FeatureColumn:
 
