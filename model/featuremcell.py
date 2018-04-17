@@ -9,34 +9,41 @@ class FeatureMCell:
     def __init__(self, name, sensor):
         self.name = name
         self.sensor = sensor
-        self.links = []
+        self.sensorLinks = []
+        self.fmcLinks = []
         self.status = 0
         self.score = 0.0
         self.activeFrq = 0
-        self.initLinks()
         self.predict = []
         self.activeHistory = []
+        #init functions
+        self.initSensorLinks()
 
-    def initLinks(self):
+    def initSensorLinks(self):
         sensorSize = self.sensor.size
         posarr = [m for m in range(0,sensorSize)]
         picksize = random.randrange(round(sensorSize*0.07), round(sensorSize*0.1))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
             link = Link('L'+str(idx),self.sensor,pos,self)
-            self.links.append(link)
-    
+            self.sensorLinks.append(link)
+
+    def initFMCLinks(self, fmcs):
+        for idx,fmc in enumerate(fmcs):
+            link = Link('L'+str(idx),self.sensor,0,fmc)
+            self.fmcLinks.append(link)
+
     def run(self):
         sum = 0.0
-        for link in self.links:
+        for link in self.sensorLinks:
             sum = sum + link.weight * self.sensor.inputData[link.pos]
         self.score = sum
 
         #20% links active -> featuremcell active
-        if self.score > len(self.links)*0.2:
+        if self.score > len(self.sensorLinks)*0.2:
             self.activeHistory.append('1')
             self.activeFrq += 1
-            for link in self.links:
+            for link in self.sensorLinks:
                 if self.sensor.inputData[link.pos] == 0:
                     link.downWeight()
                 else:
@@ -49,12 +56,12 @@ class FeatureMCell:
             self.activeHistory.pop(0)
 
         #remove links
-        newLinks = [item for item in self.links if item.weight > 0]
-        self.links = newLinks
+        newLinks = [item for item in self.sensorLinks if item.weight > 0]
+        self.sensorLinks = newLinks
 
     def getFeatureImg(self,border=False):
         imgMap = [0 for m in range(0,self.sensor.size)]
-        for link in self.links:
+        for link in self.sensorLinks:
             if self.activeFrq > 0:
                 imgMap[link.pos] = link.weight
         x = int(np.sqrt(self.sensor.size))
@@ -64,8 +71,8 @@ class FeatureMCell:
         return fimg
 
     def debug(self,lev=0):
-        d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.links))+ ":" + ''.join(self.activeHistory) + ":"
+        d = self.name + ":" + str(self.activeFrq) + ":" + str(self.score) + "/" + str(len(self.sensorLinks))+ ":" + ''.join(self.activeHistory) + ":"
         if lev>0:
-            for link in self.links:
+            for link in self.sensorLinks:
                 d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'
         print(d)

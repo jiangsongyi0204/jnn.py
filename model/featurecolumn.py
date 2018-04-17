@@ -18,6 +18,16 @@ class FeatureColumn:
             fmc = FeatureMCell('FMC'+str(i), self.sensor)
             self.fmcs.append(fmc)
 
+        #Init links   
+        for i in range(0,FeatureColumn.FMC_NUM):
+            posarr = [m for m in range(0,FeatureColumn.FMC_NUM)]
+            picksize = random.randrange(round(FeatureColumn.FMC_NUM*0.1), round(FeatureColumn.FMC_NUM*0.3))
+            linksPos = random.sample(posarr,picksize)
+            fmcs = []
+            for pos in linksPos:
+                fmcs.append(self.fmcs[pos])
+            self.fmcs[i].initFMCLinks(fmcs)            
+    
     def run(self):
         for fmc in self.fmcs:
             fmc.run()
