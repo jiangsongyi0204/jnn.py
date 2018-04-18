@@ -6,7 +6,7 @@ from model.link import Link
 
 class FeatureMCell:
 
-    def __init__(self, name, sensor):
+    def __init__(self, name, sensor, fc):
         self.name = name
         self.sensor = sensor
         self.sensorLinks = []
@@ -14,8 +14,12 @@ class FeatureMCell:
         self.status = 0
         self.score = 0.0
         self.activeFrq = 0
+        self.isActive = False
+        self.isPreActive = False
+        self.willActive = 0.0
         self.predict = []
         self.activeHistory = []
+        self.fc = fc
         #init functions
         self.initSensorLinks()
 
@@ -40,7 +44,9 @@ class FeatureMCell:
         self.score = sum
 
         #20% links active -> featuremcell active
+        self.isPreActive = self.isActive
         if self.score > len(self.sensorLinks)*0.2:
+            self.isActive = True
             self.activeHistory.append('1')
             self.activeFrq += 1
             for link in self.sensorLinks:
@@ -57,7 +63,18 @@ class FeatureMCell:
 
         #remove links
         newLinks = [item for item in self.sensorLinks if item.weight > 0]
-        self.sensorLinks = newLinks
+        self.sensorLinks = newLinks      
+
+    def learnSequence(self):
+        #loop fmc links 
+        #todo
+        if self.isPreActive and self.activeFrq>100:
+            for link in self.fmcLinks:
+                linkedFmc = link.featuremcell
+                if linkedFmc.isActive:
+                    link.upWeight()
+                else:
+                    link.downWeight()
 
     def getFeatureImg(self,border=False):
         imgMap = [0 for m in range(0,self.sensor.size)]

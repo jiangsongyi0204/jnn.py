@@ -23,7 +23,9 @@ if __name__=="__main__":
         cv2.imshow('Edges',cv2.resize(sensor.getSensorImg(),(200,200)))
         fc.run()
         #################
-        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(srt=True),(500,500)))
+        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))
+        cv2.imshow('Predict Map',cv2.resize(fc.getPredictFmc(),(200,200)))
+        
         #cv2.imshow('Feature Map', fc.getFeatureMap(srt=True))
         
         if cv2.waitKey(33) >= 0:
