@@ -21,7 +21,7 @@ class FeatureColumn:
         #Init links   
         for i in range(0,FeatureColumn.FMC_NUM):
             posarr = [m for m in range(0,FeatureColumn.FMC_NUM)]
-            picksize = random.randrange(round(FeatureColumn.FMC_NUM*0.1), round(FeatureColumn.FMC_NUM*0.3))
+            picksize = random.randrange(round(FeatureColumn.FMC_NUM*0.01), round(FeatureColumn.FMC_NUM*0.03))
             linksPos = random.sample(posarr,picksize)
             fmcs = []
             for pos in linksPos:
@@ -31,7 +31,9 @@ class FeatureColumn:
     def run(self):
         for fmc in self.fmcs:
             fmc.run()
-            fmc.debug()
+            #fmc.debug()
+            if (fmc.isFixed):
+                print(fmc.output())
         for fmc in self.fmcs:
             fmc.learnSequence()
             fmc.willActive = 0.0
@@ -41,25 +43,20 @@ class FeatureColumn:
             if fmc.isActive:
                 for fmcLink in fmc.fmcLinks:
                     linkedFmc = fmcLink.featuremcell
-                    if fmc.activeFrq > 100 and linkedFmc.activeFrq > 100:
+                    if fmc.isFixed and linkedFmc.isFixed:
                         linkedFmc.willActive = linkedFmc.willActive + fmcLink.weight
         predMap = [fmc.willActive for fmc in self.fmcs]
         sortindex = np.argsort(predMap)
         sortindex = sortindex[:90]
         for idx in sortindex:
             predMap[idx] = 0.0
-        print(predMap)
+        #print(predMap)
         x = int(np.sqrt(FeatureColumn.FMC_NUM))
         return np.reshape(predMap,(x,x))
     
-    def getSortedFMC(self):
-        return sorted(self.fmcs, key=lambda x: x.activeFrq, reverse=True)
-    
-    def getFeatureMap(self,srt=False):
-        if srt == True:
-            fmcs = self.getSortedFMC()
-        else:
-            fmcs = self.fmcs
+    def getFeatureMap(self):
+        
+        fmcs = self.fmcs
 
         w = np.sqrt(FeatureColumn.FMC_NUM)
         rowa = []

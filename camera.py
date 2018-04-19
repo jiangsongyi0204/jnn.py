@@ -29,8 +29,6 @@ if __name__=="__main__":
         #cv2.imshow('Feature Map', fc.getFeatureMap(srt=True))
         
         if cv2.waitKey(33) >= 0:
-            fcmx = fc.getSortedFMC()
-            Helper.draw(fcmx)
             break
     
     cv2.destroyAllWindows()
