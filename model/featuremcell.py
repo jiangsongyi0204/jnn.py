@@ -3,21 +3,25 @@ import numpy as np
 import math
 from lib.helper import Helper
 from model.link import Link
+from model.featureccell import FeatureCCell
 
 class FeatureMCell:
 
     def __init__(self, name, sensor, fc):
         self.name = name
         self.sensor = sensor
-        self.sensorLinks = []
-        self.fmcLinks = []
-        self.isFixed = False
-        self.score = 0.0
-        self.isActive = False
-        self.isPreActive = False
-        self.willActive = 0.0
-        self.predict = []
         self.fc = fc
+        self.sensorLinks = []
+        self.fmcConnect = []
+        self.isFixed = False
+
+        self.isActive = False
+        self.isActiveScore = 0.0
+        self.isPreActive = False
+        self.isPreActiveScore = 0.0        
+        self.isNextActive = False
+        self.isNextActiveScore = 0.0
+        #child cell 
         self.child = []
         #init functions
         self.initSensorLinks()
@@ -32,28 +36,41 @@ class FeatureMCell:
             link = Link('L'+str(idx),self.sensor,pos,self)
             self.sensorLinks.append(link)
 
-    def initFMCLinks(self, fmcs):
-        for idx,fmc in enumerate(fmcs):
-            link = Link('L'+str(idx),self.sensor,0,fmc)
-            self.fmcLinks.append(link)
+    def initFMCConnect(self, fmcs):
+        self.fmcConnect = []
+        for fmc in fmcs:
+            self.fmcConnect.append(fmc)
 
     def run(self):
-        #
         self.isPreActive = self.isActive
-        #
-        sum = 0.0
-        for link in self.sensorLinks:
-            sum = sum + link.weight * self.sensor.inputData[link.pos]
-        self.score = sum
+        self.isPreActiveScore = self.isActiveScore
 
-        #20% links active -> featuremcell active
-        if self.score > len(self.sensorLinks)*0.2:
-            self.isActive = True
+        if self.isFixed == True:
+            if len(self.child)==0:
+                self.debug(lev=1)
+            isAct = False
+            sum = 0
+            for fcc in self.child:
+                if fcc.isActive:
+                    isAct = True
+                    sum = sum + 1
+            self.isActive = isAct
+            self.isActiveScore = sum / len(self.child)
         else:
-            self.isActive = False
+            sum = 0.0
+            for link in self.sensorLinks:
+                sum = sum + link.weight * self.sensor.inputData[link.pos]
 
-        #Not fixed
-        if self.isFixed == False:
+            #score
+            self.isActiveScore = sum / len(self.sensorLinks)
+
+            #20% links active -> featuremcell active
+            if sum > len(self.sensorLinks)*0.2:
+                self.isActive = True
+            else:
+                self.isActive = False
+
+            #Not fixed
             if self.isActive == True:
                 for link in self.sensorLinks:
                         if self.sensor.inputData[link.pos] == 0:
@@ -76,47 +93,75 @@ class FeatureMCell:
         
         if w > len(self.sensorLinks)*0.9:
             self.isFixed = True
+            self.makeChild()
 
-    def output(self):
+    def makeChild(self):
+        self.child = []
         if self.isFixed:
+            #1.link sensor
             sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
             min_p = sensorlinksSorted[0].pos
             max_p = sensorlinksSorted[-1].pos
-            range_l = self.sensor.size - max_p - min_p 
+            range_l = self.sensor.size - max_p + min_p 
             for i in range(0,range_l):
-                sum = 0.0
-                for sl in self.sensorLinks:
-                    sum = sum + self.sensor.inputData[sl.pos-min_p+i]*sl.weight
-                if sum > len(self.sensorLinks)*0.7:
-                    self.child.append(0)
-                else:
-                    self.child.append(1)
-        return self.child
+                fcc = FeatureCCell(self.name + '-C'+str(i), self.sensor, self)
+                for idx,sl in enumerate(self.sensorLinks):
+                    link = Link(fcc.name+'-l'+str(idx),self.sensor,sl.pos-min_p+i,None)
+                    link.weight = 1.0
+                    fcc.sensorLinks.append(link)
+                self.child.append(fcc)
+            #2.link fmcs
+            for fmc_con in self.fmcConnect:
+                if fmc_con.isFixed:
+                    len_child_from = len(self.child)
+                    linksPos_from = Helper.pos_random_sample(len_child_from,0.4,0.6)
+                    for pos_from in linksPos_from:
+                        len_child_to = len(fmc_con.child)
+                        linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
+                        for pos_to in linksPos_to: 
+                            link = Link(str(self.child[pos_from].name) + '-' + str(pos_from) + '-' + str(pos_to),None,pos_to,fmc_con)
+                            self.child[pos_from].fmcLinks.append(link)
+                        #self.child[pos_from].debug(lev=1)
 
     def learnSequence(self):
-        #loop fmc links 
-        #todo
-        if self.isPreActive and self.isFixed:
-            for link in self.fmcLinks:
-                linkedFmc = link.featuremcell
-                if linkedFmc.isActive:
-                    link.upWeight()
-                else:
-                    link.downWeight()
+        #loop child
+        if self.isPreActive:
+            for fcc in self.child:
+                fcc.learnSequence()
+
+    def predict(self):
+        score = 0
+        sum = 0
+        for fcc in self.child:
+            fcc.predict()
+            if fcc.isNextActive:
+                sum = sum + 1
+            score = score + fcc.isNextActiveScore
+        self.isNextActiveScore = score
+        if sum > len(self.child)*0.02:
+            self.isNextActive = True
+        else:
+            self.isNextActive = False
 
     def getFeatureImg(self,border=False):
-        imgMap = [0 for m in range(0,self.sensor.size)]
+        imgMap = [0.0 for m in range(0,self.sensor.size)]
         for link in self.sensorLinks:
-            imgMap[link.pos] = link.weight
+            if self.isFixed:
+                imgMap[link.pos] = link.weight * 10
+            else:
+                imgMap[link.pos] = link.weight
         x = int(np.sqrt(self.sensor.size))
         fimg = np.reshape(imgMap,(x,x))
         if border == True:
-            fimg = np.pad(fimg, 1, Helper.pad_with, padder=10)
+            fimg = np.pad(fimg, 1, Helper.pad_with, padder=255)
         return fimg
 
     def debug(self,lev=0):
-        d = self.name + ":" + str(self.score) + "/" + str(len(self.sensorLinks))+ ":"
+        d = self.name + ":" + str(self.isActiveScore) + ":" + str(self.isNextActiveScore) + ":"
         if lev>0:
             for link in self.sensorLinks:
                 d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'
+            for fcc in self.child:
+                for link in fcc.fmcLinks:
+                    d = d + "\n" + link.name + ':' + str(link.weight) + ':' + str(link.weight*link.featuremcell.child[link.pos].isActiveScore)
         print(d)

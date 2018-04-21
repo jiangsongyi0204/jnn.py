@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import random
 
 class Helper:
     
@@ -19,3 +20,10 @@ class Helper:
         vector[:pad_width[0]] = pad_value
         vector[-pad_width[1]:] = pad_value
         return vector
+
+    @staticmethod
+    def pos_random_sample(size, min_rate, max_rate):
+        posarr = [m for m in range(0,size)]
+        picksize = random.randrange(round(size*min_rate), round(size*max_rate))
+        pos_arr = random.sample(posarr,picksize)
+        return pos_arr

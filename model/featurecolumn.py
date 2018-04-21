@@ -2,6 +2,7 @@ import random
 import numpy as np
 import math
 from model.featuremcell import FeatureMCell
+from lib.helper import Helper
 
 class FeatureColumn:
 
@@ -20,32 +21,24 @@ class FeatureColumn:
 
         #Init links   
         for i in range(0,FeatureColumn.FMC_NUM):
-            posarr = [m for m in range(0,FeatureColumn.FMC_NUM)]
-            picksize = random.randrange(round(FeatureColumn.FMC_NUM*0.01), round(FeatureColumn.FMC_NUM*0.03))
-            linksPos = random.sample(posarr,picksize)
+            linksPos = Helper.pos_random_sample(FeatureColumn.FMC_NUM,0.01,0.03)
             fmcs = []
             for pos in linksPos:
-                fmcs.append(self.fmcs[pos])
-            self.fmcs[i].initFMCLinks(fmcs)            
+                if i != pos:
+                    fmcs.append(self.fmcs[pos])
+            self.fmcs[i].initFMCConnect(fmcs)            
     
     def run(self):
         for fmc in self.fmcs:
             fmc.run()
-            #fmc.debug()
-            if (fmc.isFixed):
-                print(fmc.output())
         for fmc in self.fmcs:
             fmc.learnSequence()
-            fmc.willActive = 0.0
+        for fmc in self.fmcs:
+            fmc.predict()
+            fmc.debug(lev=1)
 
     def getPredictFmc(self):
-        for fmc in self.fmcs:
-            if fmc.isActive:
-                for fmcLink in fmc.fmcLinks:
-                    linkedFmc = fmcLink.featuremcell
-                    if fmc.isFixed and linkedFmc.isFixed:
-                        linkedFmc.willActive = linkedFmc.willActive + fmcLink.weight
-        predMap = [fmc.willActive for fmc in self.fmcs]
+        predMap = [fmc.isNextActiveScore for fmc in self.fmcs]
         sortindex = np.argsort(predMap)
         sortindex = sortindex[:90]
         for idx in sortindex:
@@ -54,10 +47,8 @@ class FeatureColumn:
         x = int(np.sqrt(FeatureColumn.FMC_NUM))
         return np.reshape(predMap,(x,x))
     
-    def getFeatureMap(self):
-        
+    def getFeatureMap(self):       
         fmcs = self.fmcs
-
         w = np.sqrt(FeatureColumn.FMC_NUM)
         rowa = []
         ret = []
@@ -68,15 +59,8 @@ class FeatureColumn:
                         ret = rowa
                     else:
                         ret = np.concatenate((ret, rowa), axis=0) 
-
                 rowa = fmcs[i].getFeatureImg(border=True)
             else:
                 rowa = np.concatenate((rowa, fmcs[i].getFeatureImg(border=True)), axis=1)
             
         return ret
-
-    def output(self):
-        print("out")
-
-    def initFmcs(self):
-        f = self.fmcs
