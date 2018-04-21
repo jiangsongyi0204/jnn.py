@@ -25,16 +25,15 @@ class FeatureColumn:
             fmc.run()
             if fmc.isFixed:
                 sum = sum + 1
-        if sum > self.fmc_num*0.9:
+        if sum > self.fmc_num*0.5:
             self.isStable = True
-
         for fmc in self.fmcs:
             fmc.learnSequence()
         for fmc in self.fmcs:
             fmc.predict()
 
-        for fmc in self.fmcs:
-            fmc.debug()
+        #for fmc in self.fmcs:
+        #    fmc.debug()
 
     def getPredictFmc(self):
         predMap = [fmc.isNextActiveScore for fmc in self.fmcs]

@@ -22,6 +22,14 @@ class Sensor:
                 else:
                     self.inputData.append(0.0)
 
+    def readData(self, data):
+        self.inputData = []
+        for d in data:
+            if d != 0:
+                self.inputData.append(1.0)
+            else:
+                self.inputData.append(0.0)
+                
     def getSensorImg(self):
         return np.reshape(self.inputData, (self.imgSize, self.imgSize))
 

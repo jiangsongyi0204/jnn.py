@@ -15,7 +15,22 @@ class FeatureMCell:
         self.sensorLinks = []
         self.fmcConnect = []
         self.isFixed = False
+        self.isActive = False
+        self.isActiveScore = 0.0
+        self.isPreActive = False
+        self.isPreActiveScore = 0.0        
+        self.isNextActive = False
+        self.isNextActiveScore = 0.0
+        #child cell 
+        self.child = []
+        self.isChildLinked = False
+        #init functions
+        self.initSensorLinks()
 
+    def initV(self):
+        self.sensorLinks = []
+        self.fmcConnect = []
+        self.isFixed = False
         self.isActive = False
         self.isActiveScore = 0.0
         self.isPreActive = False
@@ -83,7 +98,7 @@ class FeatureMCell:
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
             if len(newLinks) < self.sensor.size*0.02:
-                self.initSensorLinks()
+                self.initV()
             else:
                 self.sensorLinks = newLinks
                 self.doFix()
@@ -104,7 +119,10 @@ class FeatureMCell:
             sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
             min_p = sensorlinksSorted[0].pos
             max_p = sensorlinksSorted[-1].pos
-            range_l = self.sensor.size - max_p + min_p 
+            range_l = self.sensor.size - max_p + min_p
+            if range_l<10:
+                self.initV()
+                return 
             for i in range(0,range_l):
                 fcc = FeatureCCell(self.name + '-C'+str(i), self.sensor, self)
                 for idx,sl in enumerate(self.sensorLinks):
@@ -112,30 +130,6 @@ class FeatureMCell:
                     link.weight = 1.0
                     fcc.sensorLinks.append(link)
                 self.child.append(fcc)
-            '''
-            #2.link fmcs
-            for fcc in self.child:
-                for fmc_con in self.fmcConnect:
-                    len_child_to = len(fmc_con.child)
-                    linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
-                    for pos_to in linksPos_to:
-                        linkFcc = fmc_con[pos_to] 
-                        link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
-                        fcc.fmcLinks.append(link)
-                    
-
-            for fmc_con in self.fmcConnect:
-                if fmc_con.isFixed:
-                    len_child_from = len(self.child)
-                    linksPos_from = Helper.pos_random_sample(len_child_from,0.4,0.6)
-                    for pos_from in linksPos_from:
-                        len_child_to = len(fmc_con.child)
-                        linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
-                        for pos_to in linksPos_to: 
-                            link = Link(str(self.child[pos_from].name) + '-' + str(pos_from) + '-' + str(pos_to),None,pos_to,fmc_con)
-                            self.child[pos_from].fmcLinks.append(link)
-                        #self.child[pos_from].debug(lev=1)
-            '''
 
     def learnSequence(self):
         if self.isChildLinked:
@@ -150,14 +144,15 @@ class FeatureMCell:
         if fc.isStable:
             fmcPos = Helper.pos_random_sample(fc.fmc_num,0.2,0.5)
             for pos in fmcPos:
-                fmc_con = fc[pos]
-                for fcc in self.child:
-                    len_child_to = len(fmc_con.child)
-                    linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
-                    for pos_to in linksPos_to:
-                        linkFcc = fmc_con[pos_to] 
-                        link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
-                        fcc.fmcLinks.append(link)
+                fmc_con = fc.fmcs[pos]
+                if fmc_con.isFixed:
+                    for fcc in self.child:
+                        len_child_to = len(fmc_con.child)
+                        linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
+                        for pos_to in linksPos_to:
+                            linkFcc = fmc_con.child[pos_to] 
+                            link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
+                            fcc.fmcLinks.append(link)
             self.isChildLinked = True
 
     def predict(self):

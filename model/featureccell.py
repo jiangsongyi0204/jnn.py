@@ -51,7 +51,7 @@ class FeatureCCell:
             fcc = link.to_fcc
             if fcc.isActive:
                 sum = sum + link.weight
-        
+        print(str(len(self.fmcLinks))+'-'+str(sum))
         self.isNextActiveScore = sum
 
         if sum > len(self.fmcLinks)*0.2:
