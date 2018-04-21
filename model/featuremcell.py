@@ -3,6 +3,7 @@ import numpy as np
 import math
 from lib.helper import Helper
 from model.link import Link
+from model.clink import CellLink
 from model.featureccell import FeatureCCell
 
 class FeatureMCell:
@@ -23,6 +24,7 @@ class FeatureMCell:
         self.isNextActiveScore = 0.0
         #child cell 
         self.child = []
+        self.isChildLinked = False
         #init functions
         self.initSensorLinks()
 
@@ -110,7 +112,18 @@ class FeatureMCell:
                     link.weight = 1.0
                     fcc.sensorLinks.append(link)
                 self.child.append(fcc)
+            '''
             #2.link fmcs
+            for fcc in self.child:
+                for fmc_con in self.fmcConnect:
+                    len_child_to = len(fmc_con.child)
+                    linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
+                    for pos_to in linksPos_to:
+                        linkFcc = fmc_con[pos_to] 
+                        link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
+                        fcc.fmcLinks.append(link)
+                    
+
             for fmc_con in self.fmcConnect:
                 if fmc_con.isFixed:
                     len_child_from = len(self.child)
@@ -122,12 +135,30 @@ class FeatureMCell:
                             link = Link(str(self.child[pos_from].name) + '-' + str(pos_from) + '-' + str(pos_to),None,pos_to,fmc_con)
                             self.child[pos_from].fmcLinks.append(link)
                         #self.child[pos_from].debug(lev=1)
+            '''
 
     def learnSequence(self):
-        #loop child
-        if self.isPreActive:
+        if self.isChildLinked:
+            #if self.isPreActive:
             for fcc in self.child:
                 fcc.learnSequence()
+        else:
+            self.linkChild()
+
+    def linkChild(self):
+        fc = self.fc
+        if fc.isStable:
+            fmcPos = Helper.pos_random_sample(fc.fmc_num,0.2,0.5)
+            for pos in fmcPos:
+                fmc_con = fc[pos]
+                for fcc in self.child:
+                    len_child_to = len(fmc_con.child)
+                    linksPos_to = Helper.pos_random_sample(len_child_to,0.4,0.6)
+                    for pos_to in linksPos_to:
+                        linkFcc = fmc_con[pos_to] 
+                        link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
+                        fcc.fmcLinks.append(link)
+            self.isChildLinked = True
 
     def predict(self):
         score = 0
@@ -157,7 +188,7 @@ class FeatureMCell:
         return fimg
 
     def debug(self,lev=0):
-        d = self.name + ":" + str(self.isActiveScore) + ":" + str(self.isNextActiveScore) + ":"
+        d = self.name + ":" + str(self.isActiveScore) + ":" + str(self.isNextActiveScore) + ":" + str(self.isChildLinked)
         if lev>0:
             for link in self.sensorLinks:
                 d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'

@@ -6,36 +6,35 @@ from lib.helper import Helper
 
 class FeatureColumn:
 
-    FMC_NUM = 100
-
-    def __init__(self, name, sensor):
+    def __init__(self, name, sensor, fmc_num = 100):
         self.name = name
         self.sensor = sensor
         self.fmcs = []
+        self.fmc_num = fmc_num
+        self.isStable = False
         self.initFMC()
     
     def initFMC(self):
-        for i in range(0,FeatureColumn.FMC_NUM):
+        for i in range(0,self.fmc_num):
             fmc = FeatureMCell('FMC'+str(i), self.sensor, self)
             self.fmcs.append(fmc)
 
-        #Init links   
-        for i in range(0,FeatureColumn.FMC_NUM):
-            linksPos = Helper.pos_random_sample(FeatureColumn.FMC_NUM,0.01,0.03)
-            fmcs = []
-            for pos in linksPos:
-                if i != pos:
-                    fmcs.append(self.fmcs[pos])
-            self.fmcs[i].initFMCConnect(fmcs)            
-    
     def run(self):
+        sum  = 0
         for fmc in self.fmcs:
             fmc.run()
+            if fmc.isFixed:
+                sum = sum + 1
+        if sum > self.fmc_num*0.9:
+            self.isStable = True
+
         for fmc in self.fmcs:
             fmc.learnSequence()
         for fmc in self.fmcs:
             fmc.predict()
-            fmc.debug(lev=1)
+
+        for fmc in self.fmcs:
+            fmc.debug()
 
     def getPredictFmc(self):
         predMap = [fmc.isNextActiveScore for fmc in self.fmcs]
@@ -44,15 +43,15 @@ class FeatureColumn:
         for idx in sortindex:
             predMap[idx] = 0.0
         #print(predMap)
-        x = int(np.sqrt(FeatureColumn.FMC_NUM))
+        x = int(np.sqrt(self.fmc_num))
         return np.reshape(predMap,(x,x))
     
     def getFeatureMap(self):       
         fmcs = self.fmcs
-        w = np.sqrt(FeatureColumn.FMC_NUM)
+        w = np.sqrt(self.fmc_num)
         rowa = []
         ret = []
-        for i in range(0,FeatureColumn.FMC_NUM):
+        for i in range(0,self.fmc_num):
             if i % w == 0:
                 if i > 0:
                     if i == w:

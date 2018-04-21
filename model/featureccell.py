@@ -2,7 +2,7 @@ import random
 import numpy as np
 import math
 from lib.helper import Helper
-from model.link import Link
+from model.clink import CellLink
 
 class FeatureCCell:
 
@@ -39,7 +39,7 @@ class FeatureCCell:
     def learnSequence(self):
         if self.isPreActive:
             for link in self.fmcLinks:
-                fcc = link.featuremcell.child[link.pos]
+                fcc = link.to_fcc
                 if fcc.isActive:
                     link.upWeight()
                 else:
@@ -48,7 +48,7 @@ class FeatureCCell:
     def predict(self):
         sum = 0.0
         for link in self.fmcLinks:
-            fcc = link.featuremcell.child[link.pos]
+            fcc = link.to_fcc
             if fcc.isActive:
                 sum = sum + link.weight
         
