@@ -25,5 +25,10 @@ class Helper:
     def pos_random_sample(size, min_rate, max_rate):
         posarr = [m for m in range(0,size)]
         picksize = random.randrange(round(size*min_rate), round(size*max_rate))
-        pos_arr = random.sample(posarr,picksize)
-        return pos_arr
+        return random.sample(posarr,picksize)
+
+    @staticmethod
+    def arr_random_sample(vec, min_rate, max_rate):
+        size = len(vec)
+        picksize = random.randrange(round(size*min_rate), round(size*max_rate))
+        return random.sample(vec,picksize)

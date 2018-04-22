@@ -44,16 +44,19 @@ class FeatureCCell:
                     link.upWeight()
                 else:
                     link.downWeight()
+            #remove links
+            newLinks = [item for item in self.fmcLinks if item.weight > 0]
+            if len(newLinks) != len(self.fmcLinks):
+                self.fmcLinks = newLinks
 
     def predict(self):
         sum = 0.0
         for link in self.fmcLinks:
-            fcc = link.to_fcc
-            if fcc.isActive:
+            to_fcc = link.to_fcc
+            if to_fcc.isActive:
                 sum = sum + link.weight
-        print(str(len(self.fmcLinks))+'-'+str(sum))
         self.isNextActiveScore = sum
-
+            
         if sum > len(self.fmcLinks)*0.2:
             self.isNextActive = True
         else:
@@ -70,10 +73,10 @@ class FeatureCCell:
         return fimg
 
     def debug(self,lev=0):
-        d = self.name + ":"
+        d = "  ~" + self.name + ":"
         if lev>0:
             for link in self.sensorLinks:
                 d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'
             for link in self.fmcLinks:
-                d = d + '(' + link.name + ')'                
+                d = d + '(' + link.name + ':' + str(round(link.weight,2))  + ')'                
         print(d)
