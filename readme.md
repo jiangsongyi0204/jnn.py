@@ -24,6 +24,6 @@ pip install imageio
 #Test input data from web camera
 python camera.py
 
-#Test input data from gif images 
-python gif.py
+#Test input data from mnist 
+python mnist.py
 ```

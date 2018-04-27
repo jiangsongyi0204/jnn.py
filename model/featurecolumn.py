@@ -24,14 +24,15 @@ class FeatureColumn:
         sum  = 0
         for fmc in self.fmcs:
             fmc.run()
+            fmc.debug()
             if fmc.isFixed:
                 sum = sum + 1
         if sum > self.fmc_num*0.5:
             self.isStable = True
 
-        self.output()
+        #self.output()
         '''
-        for fmc in self.fmcs:
+        for fmc in self.#fmcs:
             fmc.learnSequence()
         for fmc in self.fmcs:
             fmc.predict()

@@ -58,7 +58,7 @@ class FeatureMCell:
         self.sensorLinks = []
         sensorSize = self.sensor.size
         posarr = [m for m in range(0,sensorSize)]
-        picksize = random.randrange(round(sensorSize*0.07), round(sensorSize*0.1))
+        picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.03))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
             link = Link('L'+str(idx),self.sensor,pos,self)
@@ -111,7 +111,7 @@ class FeatureMCell:
 
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
-            if len(newLinks) < self.sensor.size*0.02:
+            if len(newLinks) < self.sensor.size*0.002:
                 self.initV()
             else:
                 self.sensorLinks = newLinks

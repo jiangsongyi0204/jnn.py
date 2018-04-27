@@ -22,6 +22,15 @@ class Sensor:
                 else:
                     self.inputData.append(0.0)
 
+    def readMnist(self, image):
+        self.inputData = []
+        for x in range(self.imgSize):
+            for y in range(self.imgSize):
+                if image[x,y] > 0:
+                    self.inputData.append(1.0)
+                else:
+                    self.inputData.append(0.0)
+
     def readData(self, data):
         self.inputData = []
         for d in data:
