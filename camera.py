@@ -12,7 +12,7 @@ if __name__=="__main__":
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
     sensor = Sensor('EdgeSensor', 100)
-    fc = FeatureColumn('FC',sensor)
+    fc = FeatureColumn('FC',sensor,25)
 
     while True:
         ret, image = capture.read()
@@ -23,10 +23,11 @@ if __name__=="__main__":
         cv2.imshow('Edges',cv2.resize(sensor.getSensorImg(),(200,200)))
         fc.run()
         #################
-        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))
-        cv2.imshow('Predict Map',cv2.resize(fc.getPredictFmc(),(200,200)))
-        
+        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))        
         #cv2.imshow('Feature Map', fc.getFeatureMap(srt=True))
+
+        #cv2.imshow('Predict Map',cv2.resize(fc.getPredictFmc(),(200,200)))
+
         
         if cv2.waitKey(33) >= 0:
             break

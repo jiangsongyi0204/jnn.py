@@ -4,6 +4,7 @@ import math
 from lib.helper import Helper
 from model.link import Link
 from model.clink import CellLink
+from model.fmclink import FMCLink
 from model.featureccell import FeatureCCell
 
 class FeatureMCell:
@@ -24,8 +25,13 @@ class FeatureMCell:
         #child cell 
         self.child = []
         self.isChildLinked = False
+        #
+        self.isFMCLinked = False
+        #
+        self.scanMap = []
         #init functions
         self.initSensorLinks()
+        self.initScanMap()
 
     def initV(self):
         self.sensorLinks = []
@@ -40,8 +46,13 @@ class FeatureMCell:
         #child cell 
         self.child = []
         self.isChildLinked = False
+        #
+        self.isFMCLinked = False
+        #
+        self.scanMap = []
         #init functions
         self.initSensorLinks()
+        self.initScanMap()
 
     def initSensorLinks(self):
         self.sensorLinks = []
@@ -53,27 +64,29 @@ class FeatureMCell:
             link = Link('L'+str(idx),self.sensor,pos,self)
             self.sensorLinks.append(link)
 
+    def initScanMap(self):
+        self.scanMap = [0.0 for m in range(0,self.sensor.size)]
+
     def initFMCConnect(self, fmcs):
         self.fmcConnect = []
         for fmc in fmcs:
             self.fmcConnect.append(fmc)
 
     def run(self):
+        
         self.isPreActive = self.isActive
         self.isPreActiveScore = self.isActiveScore
 
         if self.isFixed == True:
-            if len(self.child)==0:
-                self.debug(lev=1)
+            self.scanAll()
             isAct = False
             sum = 0
-            for fcc in self.child:
-                fcc.run()
-                if fcc.isActive:
+            for v in self.scanMap:
+                if v>0:
                     isAct = True
                     sum = sum + 1
             self.isActive = isAct
-            self.isActiveScore = sum / len(self.child)
+            self.isActiveScore = sum / len(self.scanMap)
         else:
             sum = 0.0
             for link in self.sensorLinks:
@@ -111,34 +124,32 @@ class FeatureMCell:
         
         if w > len(self.sensorLinks)*0.99:
             self.isFixed = True
-            self.makeChild()
 
-    def makeChild(self):
-        self.child = []
+    def scanAll(self):
         if self.isFixed:
+            self.initScanMap()
             #1.link sensor
             sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
             min_p = sensorlinksSorted[0].pos
             max_p = sensorlinksSorted[-1].pos
             range_l = self.sensor.size - max_p + min_p
-            if range_l<10:
-                self.initV()
-                return 
+            sl_len = len(self.sensorLinks)
             for i in range(0,range_l):
-                fcc = FeatureCCell(self.name + '-C'+str(i), self.sensor, self)
-                for idx,sl in enumerate(self.sensorLinks):
-                    link = Link(fcc.name+'-l'+str(idx),self.sensor,sl.pos-min_p+i,None)
-                    link.weight = 1.0
-                    fcc.sensorLinks.append(link)
-                self.child.append(fcc)
+                sum = 0
+                for sl in self.sensorLinks:
+                    inD = self.sensor.inputData[sl.pos-min_p+i]
+                    if inD == 0:
+                        sum = sum + 1
+                if sum > sl_len*0.9:
+                    self.scanMap[i] = 1.0    
 
     def learnSequence(self):
-        if self.isChildLinked:
+        if self.isFMCLinked:
             if self.isPreActive:
                 for fcc in self.child:
                     fcc.learnSequence()
         else:
-            self.linkChild()
+            self.linkFMC()
 
     def linkChild(self):
         if self.fc.isStable:
@@ -153,6 +164,12 @@ class FeatureMCell:
                         link = CellLink(fcc.name + '<->' + linkFcc.name, fcc, linkFcc)
                         fcc.fmcLinks.append(link)
             self.isChildLinked = True
+
+    def linkFMC(self):
+        if self.fc.isStable:
+            fixedFmc = [fmc for fmc in self.fc.fmcs if fmc.isFixed == True]
+            for fmc in fixedFmc:
+                link =  FMCLink(self.name + '<->' + fmc.name, self, fmc)  
 
     def predict(self):
         score = 0

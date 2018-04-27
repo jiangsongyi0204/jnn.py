@@ -12,6 +12,7 @@ class FeatureColumn:
         self.fmcs = []
         self.fmc_num = fmc_num
         self.isStable = False
+        self.outputData = []
         self.initFMC()
     
     def initFMC(self):
@@ -27,6 +28,9 @@ class FeatureColumn:
                 sum = sum + 1
         if sum > self.fmc_num*0.5:
             self.isStable = True
+
+        self.output()
+        '''
         for fmc in self.fmcs:
             fmc.learnSequence()
         for fmc in self.fmcs:
@@ -34,6 +38,16 @@ class FeatureColumn:
 
         #for fmc in self.fmcs:
         #    fmc.debug()
+        '''
+
+    def output(self):
+        self.outputData = []
+        for i in range(0,self.sensor.size):
+            for fmc in self.fmcs:
+                self.outputData.append(fmc.scanMap[i])
+        
+        print(self.outputData)
+            
 
     def getPredictFmc(self):
         predMap = [fmc.isNextActiveScore for fmc in self.fmcs]
