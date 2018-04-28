@@ -107,7 +107,10 @@ class FeatureMCell:
                         if self.sensor.inputData[link.pos] == 0:
                             link.downWeight()
                         else:
-                            link.upWeight()    
+                            link.upWeight()
+            else:
+                for link in self.sensorLinks:
+                    link.lostWeight()
 
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
@@ -133,15 +136,14 @@ class FeatureMCell:
             min_p = sensorlinksSorted[0].pos
             max_p = sensorlinksSorted[-1].pos
             range_l = self.sensor.size - max_p + min_p
-            sl_len = len(self.sensorLinks)
+            sensor_len = len(sensorlinksSorted)
             for i in range(0,range_l):
                 sum = 0
-                for sl in self.sensorLinks:
-                    inD = self.sensor.inputData[sl.pos-min_p+i]
-                    if inD == 0:
+                for sl in sensorlinksSorted:
+                    if self.sensor.inputData[sl.pos-min_p+i] == 1:
                         sum = sum + 1
-                if sum > sl_len*0.9:
-                    self.scanMap[i] = 1.0    
+                if sum == sensor_len:
+                    self.scanMap[i] = 1.0        
 
     def learnSequence(self):
         if self.isFMCLinked:

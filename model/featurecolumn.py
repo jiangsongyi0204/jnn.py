@@ -24,13 +24,13 @@ class FeatureColumn:
         sum  = 0
         for fmc in self.fmcs:
             fmc.run()
-            fmc.debug()
+            #fmc.debug()
             if fmc.isFixed:
                 sum = sum + 1
         if sum > self.fmc_num*0.5:
             self.isStable = True
 
-        #self.output()
+        self.output()
         '''
         for fmc in self.#fmcs:
             fmc.learnSequence()
@@ -42,13 +42,14 @@ class FeatureColumn:
         '''
 
     def output(self):
+        sortedFmc = sorted(self.fmcs, key=lambda x : x.isActiveScore * int(x.isFixed), reverse=True)
         self.outputData = []
-        for i in range(0,self.sensor.size):
-            for fmc in self.fmcs:
+        for fmc in sortedFmc:
+            for i in range(0,self.sensor.size):
                 self.outputData.append(fmc.scanMap[i])
-        
-        print(self.outputData)
-            
+
+    def getOutputImg(self):
+        return np.reshape(self.outputData,(self.fmc_num,self.sensor.size))
 
     def getPredictFmc(self):
         predMap = [fmc.isNextActiveScore for fmc in self.fmcs]

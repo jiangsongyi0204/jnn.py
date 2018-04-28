@@ -3,6 +3,7 @@ import random
 class Link:
     
     CHANGE_STEP = 0.01
+    LOST_STEP = 0.0001
 
     def __init__(self, name, sensor, pos, featuremcell):
         self.name = name
@@ -18,3 +19,6 @@ class Link:
     
     def downWeight(self):
         self.weight -= Link.CHANGE_STEP
+    
+    def lostWeight(self):
+        self.weight -= Link.LOST_STEP
