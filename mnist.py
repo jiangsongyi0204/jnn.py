@@ -11,6 +11,9 @@ reader = csv.reader(f)
 
 sensor = Sensor('EdgeSensor', 784)
 fc = FeatureColumn('FC',sensor,fmc_num=100)
+fc1 = FeatureColumn('FC1',fc,fmc_num=100)
+fc2 = FeatureColumn('FC2',fc1,fmc_num=100)
+#fc3 = FeatureColumn('FC3',fc2,fmc_num=100)
 
 for idx,row in enumerate(reader):
     x = np.array(row[1:])
@@ -19,10 +22,18 @@ for idx,row in enumerate(reader):
     sensor.readMnist(image)
     cv2.imshow("Sensor Image", cv2.resize(sensor.getSensorImg(),(100,100)))
     fc.run()
-    cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))
-    cv2.imshow('Column Output',fc.getOutputImg())    
-    if idx > 9990:
-        cv2.imwrite("data\output\mnist\d_" + row[0] + ".jpg", fc.getOutputImg())        
+    cv2.imshow('Feature Map 1',fc.getFeatureMap())
+    fc1.run()
+    cv2.imshow('Feature Map 2',fc1.getFeatureMap())
+    fc2.run()
+    cv2.imshow('Feature Map 3',fc2.getFeatureMap(True))
+    print(row[0]+":"+''.join(str(fc2.inputData)))
+    #fc3.run()
+    #cv2.imshow('Feature Map 4',fc3.getFeatureMap(True))
+    #u = fc.getOutputImg()
+    #cv2.imshow('Column Output', fc.getOutputImg())
+    #cv2.imwrite('data\output\mnist\d_' + row[0] + '.txt', u) 
+
     if cv2.waitKey(33) >= 0:
         break
 

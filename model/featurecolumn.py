@@ -11,8 +11,10 @@ class FeatureColumn:
         self.sensor = sensor
         self.fmcs = []
         self.fmc_num = fmc_num
+        self.size = fmc_num
         self.isStable = False
         self.outputData = []
+        self.inputData = []
         self.initFMC()
     
     def initFMC(self):
@@ -21,6 +23,9 @@ class FeatureColumn:
             self.fmcs.append(fmc)
 
     def run(self):
+        if type(self.sensor) is FeatureColumn:
+            if self.sensor.isStable == False:
+                return
         sum  = 0
         for fmc in self.fmcs:
             fmc.run()
@@ -30,7 +35,9 @@ class FeatureColumn:
         if sum > self.fmc_num*0.5:
             self.isStable = True
 
-        self.output()
+        self.makeInputData()
+        #self.output()
+        #self.outputFmcs()
         '''
         for fmc in self.#fmcs:
             fmc.learnSequence()
@@ -48,6 +55,14 @@ class FeatureColumn:
             for i in range(0,self.sensor.size):
                 self.outputData.append(fmc.scanMap[i])
 
+    def makeInputData(self):
+        self.inputData = []
+        for fmc in self.fmcs:
+            if fmc.isActive and fmc.isFixed:
+                self.inputData.append(1.0)
+            else:
+                self.inputData.append(0.0)
+
     def getOutputImg(self):
         return np.reshape(self.outputData,(self.fmc_num,self.sensor.size))
 
@@ -61,7 +76,7 @@ class FeatureColumn:
         x = int(np.sqrt(self.fmc_num))
         return np.reshape(predMap,(x,x))
     
-    def getFeatureMap(self):       
+    def getFeatureMap(self,activeonly=False):      
         fmcs = self.fmcs
         w = np.sqrt(self.fmc_num)
         rowa = []
@@ -73,8 +88,8 @@ class FeatureColumn:
                         ret = rowa
                     else:
                         ret = np.concatenate((ret, rowa), axis=0) 
-                rowa = fmcs[i].getFeatureImg(border=True)
+                rowa = fmcs[i].getFeatureImg(True,activeonly)
             else:
-                rowa = np.concatenate((rowa, fmcs[i].getFeatureImg(border=True)), axis=1)
+                rowa = np.concatenate((rowa, fmcs[i].getFeatureImg(True,activeonly)), axis=1)
             
         return ret

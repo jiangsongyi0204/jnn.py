@@ -6,6 +6,7 @@ from model.link import Link
 from model.clink import CellLink
 from model.fmclink import FMCLink
 from model.featureccell import FeatureCCell
+from model.sensor import Sensor
 
 class FeatureMCell:
 
@@ -187,18 +188,29 @@ class FeatureMCell:
         else:
             self.isNextActive = False
 
-    def getFeatureImg(self,border=False):
-        imgMap = [0.0 for m in range(0,self.sensor.size)]
-        for link in self.sensorLinks:
-            if self.isFixed:
-                imgMap[link.pos] = link.weight * 10
-            else:
-                imgMap[link.pos] = link.weight
-        x = int(np.sqrt(self.sensor.size))
-        fimg = np.reshape(imgMap,(x,x))
-        if border == True:
-            fimg = np.pad(fimg, 1, Helper.pad_with, padder=255)
-        return fimg
+    def getFeatureImg(self,border=False,activeonly=False):
+        if type(self.sensor) is Sensor:
+            imgMap = [0.0 for m in range(0,self.sensor.size)]
+            if activeonly == False or (activeonly == True and self.isActive):
+                for link in self.sensorLinks:
+                    if self.isFixed:
+                        imgMap[link.pos] = link.weight * 10
+                    else:
+                        imgMap[link.pos] = link.weight
+            x = int(np.sqrt(self.sensor.size))
+            fimg = np.reshape(imgMap,(x,x))
+            if border == True:
+                fimg = np.pad(fimg, 1, Helper.pad_with, padder=255)
+            return fimg
+        else:
+            fi = []
+            for link in self.sensorLinks:
+                fmc = self.sensor.fmcs[link.pos]
+                if len(fi) == 0:
+                    fi = fmc.getFeatureImg(border,activeonly)
+                else:
+                    fi = fi + fmc.getFeatureImg(border,activeonly) 
+            return fi
 
     def debug(self,lev=0):
         d = self.name + ":" + str(self.isActiveScore) + ":" + str(self.isNextActiveScore) + ":" + str(self.isChildLinked)
