@@ -15,45 +15,18 @@ class FeatureMCell:
         self.sensor = sensor
         self.fc = fc
         self.sensorLinks = []
-        self.fmcConnect = []
         self.isFixed = False
         self.isActive = False
-        self.isActiveScore = 0.0
-        self.isPreActive = False
-        self.isPreActiveScore = 0.0        
-        self.isNextActive = False
-        self.isNextActiveScore = 0.0
-        #child cell 
-        self.child = []
-        self.isChildLinked = False
-        #
-        self.isFMCLinked = False
-        #
-        self.scanMap = []
         #init functions
         self.initSensorLinks()
-        self.initScanMap()
 
     def initV(self):
         self.sensorLinks = []
         self.fmcConnect = []
         self.isFixed = False
         self.isActive = False
-        self.isActiveScore = 0.0
-        self.isPreActive = False
-        self.isPreActiveScore = 0.0        
-        self.isNextActive = False
-        self.isNextActiveScore = 0.0
-        #child cell 
-        self.child = []
-        self.isChildLinked = False
-        #
-        self.isFMCLinked = False
-        #
-        self.scanMap = []
         #init functions
         self.initSensorLinks()
-        self.initScanMap()
 
     def initSensorLinks(self):
         self.sensorLinks = []
@@ -65,30 +38,10 @@ class FeatureMCell:
             link = Link('L'+str(idx),self.sensor,pos,self)
             self.sensorLinks.append(link)
 
-    def initScanMap(self):
-        self.scanMap = [0.0 for m in range(0,self.sensor.size)]
-
-    def initFMCConnect(self, fmcs):
-        self.fmcConnect = []
-        for fmc in fmcs:
-            self.fmcConnect.append(fmc)
 
     def run(self):
-        
-        self.isPreActive = self.isActive
-        self.isPreActiveScore = self.isActiveScore
 
-        if self.isFixed == True:
-            self.scanAll()
-            isAct = False
-            sum = 0
-            for v in self.scanMap:
-                if v>0:
-                    isAct = True
-                    sum = sum + 1
-            self.isActive = isAct
-            self.isActiveScore = sum / len(self.scanMap)
-        else:
+        if self.isFixed == False:
             sum = 0.0
             for link in self.sensorLinks:
                 sum = sum + link.weight * self.sensor.inputData[link.pos]
@@ -128,10 +81,6 @@ class FeatureMCell:
         
         if w > len(self.sensorLinks)*0.99:
             self.isFixed = True
-
-    def scanAll(self):
-        if self.isFixed:
-            self.initScanMap()
             #1.link sensor
             sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
             min_p = sensorlinksSorted[0].pos
@@ -146,6 +95,7 @@ class FeatureMCell:
                 if sum == sensor_len:
                     self.scanMap[i] = 1.0        
 
+    '''
     def learnSequence(self):
         if self.isFMCLinked:
             if self.isPreActive:
@@ -187,6 +137,7 @@ class FeatureMCell:
             self.isNextActive = True
         else:
             self.isNextActive = False
+    '''
 
     def getFeatureImg(self,border=False,activeonly=False):
         if type(self.sensor) is Sensor:
@@ -213,10 +164,5 @@ class FeatureMCell:
             return fi
 
     def debug(self,lev=0):
-        d = self.name + ":" + str(self.isActiveScore) + ":" + str(self.isNextActiveScore) + ":" + str(self.isChildLinked)
-        if lev>0 and self.isChildLinked:
-            for link in self.sensorLinks:
-                d = d + '[' + str(round(link.weight, 2)) + '|' + str(link.pos) + ']'
-            for fcc in self.child:
-                fcc.debug(lev=lev)
+        d = self.name + ":" + str(self.isActive) + str(self.isActiveScore)
         print(d)
