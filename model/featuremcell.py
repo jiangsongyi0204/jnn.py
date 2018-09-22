@@ -3,9 +3,6 @@ import numpy as np
 import math
 from lib.helper import Helper
 from model.link import Link
-from model.clink import CellLink
-from model.fmclink import FMCLink
-from model.featureccell import FeatureCCell
 from model.sensor import Sensor
 
 class FeatureMCell:
@@ -17,14 +14,14 @@ class FeatureMCell:
         self.sensorLinks = []
         self.isFixed = False
         self.isActive = False
-        #init functions
-        self.initSensorLinks()
+        self.isConnected = False        
+        self.reset()
 
-    def initV(self):
+    def reset(self):
         self.sensorLinks = []
-        self.fmcConnect = []
         self.isFixed = False
         self.isActive = False
+        self.isConnected = False
         #init functions
         self.initSensorLinks()
 
@@ -69,7 +66,7 @@ class FeatureMCell:
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
             if len(newLinks) < self.sensor.size*0.002:
-                self.initV()
+                self.reset()
             else:
                 self.sensorLinks = newLinks
                 self.doFix()
@@ -78,22 +75,23 @@ class FeatureMCell:
         w = 0.0
         for link in self.sensorLinks:
             w += link.weight
-        
         if w > len(self.sensorLinks)*0.99:
             self.isFixed = True
-            #1.link sensor
-            sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
-            min_p = sensorlinksSorted[0].pos
-            max_p = sensorlinksSorted[-1].pos
-            range_l = self.sensor.size - max_p + min_p
-            sensor_len = len(sensorlinksSorted)
-            for i in range(0,range_l):
-                sum = 0
-                for sl in sensorlinksSorted:
-                    if self.sensor.inputData[sl.pos-min_p+i] == 1:
-                        sum = sum + 1
-                if sum == sensor_len:
-                    self.scanMap[i] = 1.0        
+    
+    def todo(self):
+        #1.link sensor
+        sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
+        min_p = sensorlinksSorted[0].pos
+        max_p = sensorlinksSorted[-1].pos
+        range_l = self.sensor.size - max_p + min_p
+        sensor_len = len(sensorlinksSorted)
+        for i in range(0,range_l):
+            sum = 0
+            for sl in sensorlinksSorted:
+                if self.sensor.inputData[sl.pos-min_p+i] == 1:
+                    sum = sum + 1
+            #if sum == sensor_len:
+            #    self.scanMap[i] = 1.0        
 
     '''
     def learnSequence(self):

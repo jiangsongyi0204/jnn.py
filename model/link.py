@@ -5,9 +5,9 @@ class Link:
     CHANGE_STEP = 0.01
     LOST_STEP = 0.0001
 
-    def __init__(self, name, sensor, pos, featuremcell):
+    def __init__(self, name, inputField, pos, featuremcell):
         self.name = name
-        self.sensor = sensor
+        self.inputField = inputField
         self.pos = pos
         self.featuremcell = featuremcell
         self.weight = 0.5 + random.uniform(-0.2, 0.2)
