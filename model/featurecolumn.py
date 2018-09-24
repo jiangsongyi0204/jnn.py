@@ -6,6 +6,27 @@ from lib.helper import Helper
 
 '''
 Feature Column of the JNN. 
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~      Features MAP         ~
+~ A:00101010101010101010101 ~
+~ B:10010100010101000101110 ~
+~ C:01010001011100010101001 ~
+~ D:00101010101000101010101 ~
+~ ......................... ~
+~ X:00011010010101010010101 ~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            | 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~        Features           ~
+~   A,B,C,D,E,F,G,H,I,J,..  ~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            |
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~       INPUT FIELD         ~
+~ 0010100100101010001010101 ~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 '''
 class FeatureColumn:
 
@@ -16,8 +37,7 @@ class FeatureColumn:
         self.fmcSize = 100              #TODO: should related to inputField size
         self.isStable = False           #is this fmc stable, if ture this fcc will stop learning  
         self.inputData = []             #Output of this Feature Column , be the input Data to up layers
-        self.fMap = []                  #Feature map 
-        self.vMap = []                  #Feature map value
+        self.fMap = []                  #Feature map
         self.initFMC()                  #Init the fmcs
     
     def initFMC(self):
@@ -33,37 +53,34 @@ class FeatureColumn:
         for fmc in self.fmcs:
             if fmc.isFixed:
                 sum = sum + 1
-                #If fmc not connected to the MAPS, Set Connected
-                if (fmc.isConnected == False):
-                    fmc.isConnected = True
-                    self.connectFCC(fmc)
             else:
                 fmc.run()
-        if sum > self.fmcSize*0.9:
+        if sum > self.fmcSize*0.5:
             self.isStable = True
             #Delete inactive fmcs
             #TODO
 
-    def connectFCC(self, fmc):
-        self.fMap.append(fmc)
-
-    def output(self):
+    def makeFMap(self):
         step = int(self.inputField.size/self.fmcSize)
-        for fmc in self.fMap:
+        for fmc in self.fmcs:
             active = []
-            for i in range(0,self.inputField.size,step):
-                active_value = 0
-                for link in fmc.sensorLinks:
-                    if i+link.pos < self.inputField.size:
-                        if self.inputField.inputData[i+link.pos] == 1:
-                            active_value = active_value + 1
-                if active_value < len(fmc.sensorLinks)*0.8:
-                    active.append(0)
-                else:
-                    active.append(1)
-            self.vMap.append(active)
-            print(fmc.name)
-            print(active)
+            if fmc.isFixed:
+                active = [self.featureMatch(fmc,i*step) for i in range(0,self.fmcSize)]
+            else:
+                active = [0 for i in range(0,self.fmcSize)]
+            self.fMap.append(active)
+
+    def featureMatch(self,fmc,pos):
+        ret = 0
+        active_value = 0
+        for link in fmc.sensorLinks:
+            if pos+link.pos < self.inputField.size:
+                if self.inputField.inputData[pos+link.pos] == 1:
+                    active_value = active_value + 1
+
+        if active_value > len(fmc.sensorLinks)*0.8:
+            ret = 1
+        return ret
 
     def makeInputData(self):
         self.inputData = []
@@ -83,7 +100,7 @@ class FeatureColumn:
         x = int(np.sqrt(self.fmcSize))
         return np.reshape(predMap,(x,x))
     
-    def getFeatureMap(self,activeonly=False):      
+    def getFeaturesImg(self,activeonly=False):      
         fmcs = self.fmcs
         w = np.sqrt(self.fmcSize)
         rowa = []
@@ -98,4 +115,21 @@ class FeatureColumn:
                 rowa = fmcs[i].getFeatureImg(True,activeonly)
             else:
                 rowa = np.concatenate((rowa, fmcs[i].getFeatureImg(True,activeonly)), axis=1)
+        return ret
+    
+    def getFeatureMapImg(self):
+        ret = []
+        w = int(np.sqrt(self.fmcSize))
+        rowa = []
+        self.makeFMap()
+        for i in range(0,self.fmcSize):
+            if i % w == 0:
+                if i > 0:
+                    if i == w:
+                        ret = rowa
+                    else:
+                        ret = np.concatenate((ret, rowa), axis=0) 
+                rowa = np.reshape(self.fMap[i],(w,w))
+            else:
+                rowa = np.concatenate((rowa, np.reshape(self.fMap[i],(w,w))), axis=1)
         return ret

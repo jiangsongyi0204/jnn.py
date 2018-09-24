@@ -7,32 +7,30 @@ from model.sensor import Sensor
 
 class FeatureMCell:
 
-    def __init__(self, name, sensor, fc):
+    def __init__(self, name, inputField, fc):
         self.name = name
-        self.sensor = sensor
+        self.inputField = inputField
         self.fc = fc
         self.sensorLinks = []
         self.isFixed = False
-        self.isActive = False
-        self.isConnected = False        
+        self.isActive = False       
         self.reset()
 
     def reset(self):
         self.sensorLinks = []
         self.isFixed = False
         self.isActive = False
-        self.isConnected = False
         #init functions
         self.initSensorLinks()
 
     def initSensorLinks(self):
         self.sensorLinks = []
-        sensorSize = self.sensor.size
+        sensorSize = self.inputField.size
         posarr = [m for m in range(0,sensorSize)]
         picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.03))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
-            link = Link('L'+str(idx),self.sensor,pos,self)
+            link = Link('L'+str(idx),self.inputField,pos,self)
             self.sensorLinks.append(link)
 
 
@@ -41,7 +39,7 @@ class FeatureMCell:
         if self.isFixed == False:
             sum = 0.0
             for link in self.sensorLinks:
-                sum = sum + link.weight * self.sensor.inputData[link.pos]
+                sum = sum + link.weight * self.inputField.inputData[link.pos]
 
             #score
             self.isActiveScore = sum / len(self.sensorLinks)
@@ -55,7 +53,7 @@ class FeatureMCell:
             #Not fixed
             if self.isActive == True:
                 for link in self.sensorLinks:
-                        if self.sensor.inputData[link.pos] == 0:
+                        if self.inputField.inputData[link.pos] == 0:
                             link.downWeight()
                         else:
                             link.upWeight()
@@ -65,7 +63,7 @@ class FeatureMCell:
 
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
-            if len(newLinks) < self.sensor.size*0.002:
+            if len(newLinks) < self.inputField.size*0.002:
                 self.reset()
             else:
                 self.sensorLinks = newLinks
@@ -83,12 +81,12 @@ class FeatureMCell:
         sensorlinksSorted = sorted(self.sensorLinks, key=lambda x : x.pos)
         min_p = sensorlinksSorted[0].pos
         max_p = sensorlinksSorted[-1].pos
-        range_l = self.sensor.size - max_p + min_p
+        range_l = self.inputField.size - max_p + min_p
         sensor_len = len(sensorlinksSorted)
         for i in range(0,range_l):
             sum = 0
             for sl in sensorlinksSorted:
-                if self.sensor.inputData[sl.pos-min_p+i] == 1:
+                if self.inputField.inputData[sl.pos-min_p+i] == 1:
                     sum = sum + 1
             #if sum == sensor_len:
             #    self.scanMap[i] = 1.0        
@@ -138,15 +136,15 @@ class FeatureMCell:
     '''
 
     def getFeatureImg(self,border=False,activeonly=False):
-        if type(self.sensor) is Sensor:
-            imgMap = [0.0 for m in range(0,self.sensor.size)]
+        if type(self.inputField) is Sensor:
+            imgMap = [0.0 for m in range(0,self.inputField.size)]
             if activeonly == False or (activeonly == True and self.isActive):
                 for link in self.sensorLinks:
                     if self.isFixed:
                         imgMap[link.pos] = link.weight * 10
                     else:
                         imgMap[link.pos] = link.weight
-            x = int(np.sqrt(self.sensor.size))
+            x = int(np.sqrt(self.inputField.size))
             fimg = np.reshape(imgMap,(x,x))
             if border == True:
                 fimg = np.pad(fimg, 1, Helper.pad_with, padder=255)
@@ -154,7 +152,7 @@ class FeatureMCell:
         else:
             fi = []
             for link in self.sensorLinks:
-                fmc = self.sensor.fmcs[link.pos]
+                fmc = self.inputField.fmcs[link.pos]
                 if len(fi) == 0:
                     fi = fmc.getFeatureImg(border,activeonly)
                 else:

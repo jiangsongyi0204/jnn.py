@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from model.sensor import Sensor
-from model.featuremcell import FeatureMCell
 from model.featurecolumn import FeatureColumn
 from lib.helper import Helper
 
@@ -12,7 +11,7 @@ if __name__=="__main__":
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
 
     sensor = Sensor('EdgeSensor', 100)
-    fc = FeatureColumn('FC',sensor,25)
+    fc = FeatureColumn('FC',sensor)
 
     while True:
         ret, image = capture.read()
@@ -25,10 +24,7 @@ if __name__=="__main__":
         #################
         cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))        
         #cv2.imshow('Feature Map', fc.getFeatureMap(srt=True))
-
         #cv2.imshow('Predict Map',cv2.resize(fc.getPredictFmc(),(200,200)))
-
-        
         if cv2.waitKey(33) >= 0:
             break
     
