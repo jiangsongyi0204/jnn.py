@@ -5,12 +5,15 @@ class Link:
     CHANGE_STEP = 0.01
     LOST_STEP = 0.0001
 
-    def __init__(self, name, inputField, pos, featuremcell):
+    def __init__(self, name, inputField, pos, featuremcell, weight = -100):
         self.name = name
         self.inputField = inputField
         self.pos = pos
         self.featuremcell = featuremcell
-        self.weight = 0.5 + random.uniform(-0.2, 0.2)
+        if (weight == -100):
+            self.weight = 0.5 + random.uniform(-0.2, 0.2)
+        else:
+            self.weight = weight
 
     def upWeight(self):
         self.weight += Link.CHANGE_STEP

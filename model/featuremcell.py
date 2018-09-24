@@ -7,14 +7,15 @@ from model.sensor import Sensor
 
 class FeatureMCell:
 
-    def __init__(self, name, inputField, fc):
+    def __init__(self, name, inputField, fc ,shouldInit=True):
         self.name = name
         self.inputField = inputField
         self.fc = fc
         self.sensorLinks = []
         self.isFixed = False
-        self.isActive = False       
-        self.reset()
+        self.isActive = False
+        if shouldInit:       
+            self.reset()
 
     def reset(self):
         self.sensorLinks = []
@@ -63,17 +64,20 @@ class FeatureMCell:
 
             #remove links
             newLinks = [item for item in self.sensorLinks if item.weight > 0]
-            if len(newLinks) < self.inputField.size*0.002:
+            #TODO:if len(newLinks) < self.inputField.size*0.002:
+            if len(newLinks) < 3:
                 self.reset()
             else:
                 self.sensorLinks = newLinks
-                self.doFix()
+                if (self.isFixed == False):
+                    self.doFix()
 
     def doFix(self):
         w = 0.0
         for link in self.sensorLinks:
             w += link.weight
         if w > len(self.sensorLinks)*0.99:
+            print('DEBUG: ' + self.name + ' is Fixed.')
             self.isFixed = True
     
     def todo(self):
