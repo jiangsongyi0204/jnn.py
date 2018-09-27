@@ -9,7 +9,7 @@ reader = csv.reader(f)
 
 sensor = Sensor('EdgeSensor', 784)
 fc = FeatureColumn('FC',sensor,False)
-fc.importFmc('FC_v20180924_041816.txt')
+fc.importFmc('FC_v20180927_130749.txt')
 
 win1 = "Image"
 cv2.namedWindow(win1)

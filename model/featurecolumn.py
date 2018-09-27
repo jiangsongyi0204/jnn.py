@@ -119,21 +119,8 @@ class FeatureColumn:
         return ret
     
     def getFeatureMapImg(self):
-        ret = []
-        w = int(np.sqrt(self.fmcSize))
-        rowa = []
         self.makeFMap()
-        for i in range(0,self.fmcSize):
-            if i % w == 0:
-                if i > 0:
-                    if i == w:
-                        ret = rowa
-                    else:
-                        ret = np.concatenate((ret, rowa), axis=0) 
-                rowa = np.reshape(self.fMap[i],(w,w))
-            else:
-                rowa = np.concatenate((rowa, np.reshape(self.fMap[i],(w,w))), axis=1)
-        return ret
+        return np.array(self.fMap)
     
     def save(self):
         fileName = 'FC_v'+strftime("%Y%m%d_%H%M%S", gmtime())+'.txt'

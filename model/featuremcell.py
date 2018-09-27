@@ -28,12 +28,11 @@ class FeatureMCell:
         self.sensorLinks = []
         sensorSize = self.inputField.size
         posarr = [m for m in range(0,sensorSize)]
-        picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.03))
+        picksize = random.randrange(round(sensorSize*0.01), round(sensorSize*0.02))
         linksPos = random.sample(posarr,picksize)
         for idx, pos in enumerate(linksPos):
             link = Link('L'+str(idx),self.inputField,pos,self)
             self.sensorLinks.append(link)
-
 
     def run(self):
 
@@ -45,8 +44,8 @@ class FeatureMCell:
             #score
             self.isActiveScore = sum / len(self.sensorLinks)
 
-            #20% links active -> featuremcell active
-            if sum > len(self.sensorLinks)*0.2:
+            #10% links active > featuremcell active
+            if sum > len(self.sensorLinks)*0.1:
                 self.isActive = True
             else:
                 self.isActive = False
