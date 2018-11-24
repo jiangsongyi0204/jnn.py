@@ -2,17 +2,12 @@ import numpy as np
 
 class Sensor:
 
-    def __init__(self, name, showHistory=False):
+    def __init__(self, name):
         self.name = name
-        self.showHistory = showHistory
         self.data = []
     
     def read(self, image):
-        if self.showHistory == False:
-            self.data = []
-        else:
-            if len(self.data)>30:
-                self.data.pop(0)
+        self.data = []
         inputData = []
         for x in range(len(image)):
             for y in range(len(image[x])):
@@ -26,7 +21,7 @@ class Sensor:
         return self.data
 
     def getLength(self):
-        return len(self.data)
+        return 1
     
     def getSize(self):
         return len(self.data[0])

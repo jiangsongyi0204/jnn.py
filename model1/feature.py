@@ -97,11 +97,9 @@ class Feature:
         if type(self.inputField) is Sensor:
             size = int(np.sqrt(self.inputField.getSize()))
             ret = np.zeros((size,size))
-            for link in self.links:
-                if self.isFixed:
-                    ret[int(link.pos/size)][int(link.pos%size)] = link.weight * (link.idx + 1) * 10.0
-                else:
-                    ret[int(link.pos/size)][int(link.pos%size)] = 1.0            
+            if self.isFixed:
+                for link in self.links:
+                    ret[int(link.pos/size)][int(link.pos%size)] = 255.0
         else:
             size = len(self.inputField.features[0].getFeatureImg())
             ret = np.zeros((size,size))
