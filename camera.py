@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from model.sensor import Sensor
-from model.featurecolumn import FeatureColumn
+from model2.sensor import Sensor
+from model2.vision import Vision
 from lib.helper import Helper
 
 if __name__=="__main__":
@@ -9,22 +9,17 @@ if __name__=="__main__":
     if capture.isOpened() is False:
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
-
-    sensor = Sensor('EdgeSensor', 100)
-    fc = FeatureColumn('FC',sensor)
-
+    sensor = Sensor('EdgeSensor')
+    vision = Vision('Vision',sensor)
     while True:
         ret, image = capture.read()
         if ret == False:
             continue
+        height, width, channels = image.shape
         cv2.imshow("Original", image)
-        sensor.readImage(image)
-        cv2.imshow('Edges',cv2.resize(sensor.getSensorImg(),(200,200)))
-        fc.run()
-        #################
-        cv2.imshow('Feature Map',cv2.resize(fc.getFeatureMap(),(500,500)))        
-        #cv2.imshow('Feature Map', fc.getFeatureMap(srt=True))
-        #cv2.imshow('Predict Map',cv2.resize(fc.getPredictFmc(),(200,200)))
+        result = cv2.Canny(image, 100, 200)
+        sensor.read(result)
+        cv2.imshow("Vision", vision.getOutput())
         if cv2.waitKey(33) >= 0:
             break
     
