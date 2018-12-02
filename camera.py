@@ -19,7 +19,9 @@ if __name__=="__main__":
         cv2.imshow("Original", image)
         result = cv2.Canny(image, 100, 200)
         sensor.read(result)
-        cv2.imshow("Vision", vision.getOutput())
+        vision.run()
+        cv2.imshow("Vision", vision.getData())
+        cv2.imshow("CCCC", vision.getImg())
         if cv2.waitKey(33) >= 0:
             break
     

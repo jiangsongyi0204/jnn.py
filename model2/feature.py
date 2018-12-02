@@ -47,9 +47,6 @@ class Feature:
         #execute
         if self.isFixed == False:
 
-            if type(self.inputField) is not Sensor and self.inputField.isStable == False:
-                return
-
             sum = 0.0
             for link in self.links:
                 sum = sum + link.weight * self.inputField.getData()[link.idx][link.pos]
@@ -92,37 +89,9 @@ class Feature:
             print('DEBUG: ' + self.name + ' is Fixed.')
             self.isFixed = True
 
-    def getFeatureImg(self):
-        ret = []
-        if type(self.inputField) is Sensor:
-            size = int(np.sqrt(self.inputField.getSize()))
-            ret = np.zeros((size,size))
-            if self.isFixed:
-                for link in self.links:
-                    ret[int(link.pos/size)][int(link.pos%size)] = 255.0
-        else:
-            size = len(self.inputField.features[0].getFeatureImg())
-            ret = np.zeros((size,size))
-            step = int(size/len(self.inputField.features))
-            if self.isFixed:
-                for link in self.links:
-                    column = self.inputField
-                    feature = column.features[link.idx]
-                    image = feature.getFeatureImg()
-                    x1 = -100
-                    y1 = -100
-                    for x in range(len(image)):
-                        for y in range(len(image[x])):
-                            ret[x,y] = ret[x,y] + image[x,y]
-                            '''
-                            if image[x,y] > 0:
-                                psize = int(np.sqrt(len(self.inputField.features)))
-                                px = int(link.pos/psize) * step
-                                py = int(link.pos%size) * step
-                                if x1 == -100 or y1 == -100:
-                                    x1 = px - x
-                                    y1 = py - y
-                                if x+x1>=0 and x+x1<size and y+y1>=0 and y+y1<size:
-                                    ret[x+x1][y+y1] = image[x,y]
-                            '''
+    def getImg(self):
+        size = self.inputField.getSize()
+        ret = np.zeros((size,size))
+        for link in self.links:
+            ret[int(link.pos/size)][int(link.pos%size)] = 255.0 * link.weight            
         return ret
