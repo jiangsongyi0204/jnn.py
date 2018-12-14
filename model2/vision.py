@@ -4,15 +4,15 @@ from model2.field import Field
 
 class Vision:
 
-    def __init__(self, name, sensor):
+    def __init__(self, name, sensor, size, w):
         self.name = name
         self.sensor = sensor
         self.x = 0
         self.y = 0
         self.z = 0
-        self.w = 1
-        self.r = 50
-        self.window = self.w*self.r
+        self.w = w
+        self.size = size
+        self.window = self.w*self.size
         self.fields = []
         self.columns = []
         self.data = np.zeros((self.window,self.window))

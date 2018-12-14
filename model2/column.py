@@ -39,7 +39,7 @@ class Column:
         self.vy = vy
         self.inputField = field
         self.features = []              #Features
-        self.featureSize = 25           #TODO: should related to inputField size
+        self.featureSize = 1           #TODO: should related to inputField size
         self.isStable = False           #is this Column stable, if ture it will stop learning  
         if shouldInit:
             self.init()              #Init the features

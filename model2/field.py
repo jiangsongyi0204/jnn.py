@@ -7,19 +7,14 @@ class Field:
         self.vision = vision
         self.vx = vx
         self.vy = vy
-        self.data = np.zeros((self.vision.r,self.vision.r)) 
+        self.visionSize = self.vision.size
+        self.data = np.zeros((self.visionSize,self.visionSize)) 
     
     def getData(self):
-        for x in range(0,self.vision.r):
-            for y in range (0,self.vision.r):
-                self.data[x][y] = self.vision.getData()[x+self.vx,y+self.vy]
+        for x in range(0,self.visionSize):
+            for y in range (0,self.visionSize):
+                self.data[x][y] = self.vision.getData()[x+self.vx*self.visionSize,y+self.vy*self.visionSize]
         return self.data
 
-    def getLength(self):
-        return self.vision.r
-    
     def getSize(self):
-        return self.vision.r
-
-    def getOutput(self):
-        return self.getData()
+        return self.visionSize
