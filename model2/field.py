@@ -7,13 +7,15 @@ class Field:
         self.vision = vision
         self.vx = vx
         self.vy = vy
-        self.visionSize = self.vision.size
+        self.visionSize = self.vision.fieldSize
         self.data = np.zeros((self.visionSize,self.visionSize)) 
-    
+
+    def run(self):
+        x = self.vx*self.visionSize
+        y = self.vy*self.visionSize
+        self.data = self.vision.getData()[x:x+self.visionSize,y:y+self.visionSize]
+
     def getData(self):
-        for x in range(0,self.visionSize):
-            for y in range (0,self.visionSize):
-                self.data[x][y] = self.vision.getData()[x+self.vx*self.visionSize,y+self.vy*self.visionSize]
         return self.data
 
     def getSize(self):

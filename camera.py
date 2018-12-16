@@ -10,7 +10,7 @@ if __name__=="__main__":
         raise("IO Error")
     #cv2.namedWindow("Capture", cv2.WINDOW_AUTOSIZE)
     sensor = Sensor('EdgeSensor')
-    vision = Vision('Vision',sensor,40,10)
+    vision = Vision('Vision',sensor)
     while True:
         ret, image = capture.read()
         if ret == False:
@@ -19,10 +19,12 @@ if __name__=="__main__":
         #cv2.imshow("Original", image)
         result = cv2.Canny(image, 100, 200)
         #cv2.imshow("Edge", result)
-        sensor.read(result)
+        sensor.read(image)
         vision.run()
-        cv2.imshow("Vision", vision.getData())
-        cv2.imshow("Feature", vision.getImg())
+        cv2.imshow("Vision", vision.getImg())
+        cv2.imshow("Col Edge", vision.getColumnImg(3))
+        cv2.imshow("Col Feature", vision.getColumnImg(1))
+        cv2.imshow("Col Matched Feature", vision.getColumnImg(2))
         if cv2.waitKey(33) >= 0:
             break
     

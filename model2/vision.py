@@ -1,29 +1,29 @@
 import numpy as np
+import cv2
 from model2.column import Column
 from model2.field import Field
 
 class Vision:
 
-    def __init__(self, name, sensor, size, w):
+    def __init__(self, name, sensor):
         self.name = name
         self.sensor = sensor
-        self.x = 0
-        self.y = 0
-        self.z = 0
-        self.w = w
-        self.size = size
-        self.window = self.w*self.size
+        self.sensor_x = 0
+        self.sensor_y = 0
+        self.window = 0
         self.fields = []
         self.columns = []
-        self.data = np.zeros((self.window,self.window))
+        self.fieldSize = 50
+        self.fieldLen = 10
+        self.data = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
         self.init()
     
     def init(self):
-        for x in range(self.w):
-            for y in range(self.w):
+        for x in range(self.fieldLen):
+            for y in range(self.fieldLen):
                 field = Field(str(x)+"-"+str(y),self,x,y)
                 self.fields.append(field)
-                column = Column(str(x)+"-"+str(y),self,x,y,field,True)
+                column = Column(str(x)+"-"+str(y),self,x,y,field)
                 self.columns.append(column)
 
     def getData(self):
@@ -34,18 +34,22 @@ class Vision:
         for column in self.columns:
             column.run()
 
-    def getImg(self):      
-        ret = []
-        for column in self.columns:
-            if len(ret) == 0: 
-                ret = column.getImg()
-            else:
-                ret = np.concatenate((ret, column.getImg()), axis=0)
+    def getColumnImg(self,tp=1):      
+        ret = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
+        for x in range(self.fieldLen):
+            for y in range(self.fieldLen):
+                if (tp==1): 
+                    ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getImg()
+                elif (tp==2):
+                    ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getMatchedImg()
+                else:
+                    ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getEdgeImg()
         return ret
 
     def work(self):
-        px,py = self.sensor.getShape()
-        inputdata = self.sensor.getOutput()
-        for x in range(0,min(self.window-1,px-self.x)):
-            for y in range(0,min(self.window-1,py-self.y)):
-                self.data[x,y] = inputdata[x+self.x,y+self.y]
+        sensordata = self.sensor.getOutput()
+        self.data = cv2.resize(sensordata, dsize=(self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen), interpolation=cv2.INTER_LINEAR)
+        #self.data = cv2.Canny(image.astype(np.uint8), 100, 200)
+
+    def getImg(self):
+        return self.data

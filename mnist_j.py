@@ -8,7 +8,7 @@ f = open('data\input\mnist\mnist_test.csv')
 reader = csv.reader(f)
 
 sensor = Sensor('EdgeSensor')
-vision = Vision('Vision',sensor,14,2)
+vision = Vision('Vision',sensor)
 
 win1 = "Image"
 cv2.namedWindow(win1)
@@ -23,9 +23,9 @@ for idx,row in enumerate(reader):
     y = x.astype(np.float)
     image = np.reshape(y,(28,28))
     sensor.read(image)
-    cv2.imshow(win1, image)
     vision.run()
-    cv2.imshow(win2,vision.getImg())
+    cv2.imshow(win1, vision.getImg())    
+    cv2.imshow(win2,vision.getColumnImg())
     if cv2.waitKey(33) >= 0:
         break
 
