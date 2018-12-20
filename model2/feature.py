@@ -32,6 +32,7 @@ class Feature:
         #edge feature 
         self.edge = cv2.Canny(self.inputField.getData().astype(np.uint8), 100, 200)
         self.edge[self.edge > 0] = 1
+        self.edge = self.edge.astype(np.float32)
         #If no input break execute
         #if (self.edge > 0).sum() < self.size*0.02:
         #    return
@@ -48,15 +49,18 @@ class Feature:
             else:
                 if (self.links > 0.95).sum() > self.size*self.size*0.01:
                     self.isFixed = True
-                    self.links[self.links > 0.99] = 1
-                    self.links[self.links < 0.99] = 0
+                    self.links[self.links > 0.95] = 1
+                    self.links[self.links < 0.95] = 0
+                    self.links = self.links.astype(np.float32)
         else:
-            matched = (self.links == self.edge).astype(np.uint8)
-            links_sum = (self.links > 0).sum()
-            edge_sum = (self.edge > 0).sum()
-            if (matched.sum() > self.size*self.size*0.8 and abs(links_sum-edge_sum) < 10 ):
+            tLinks = np.copy(self.links)
+            tLinks[tLinks == 0] = 2
+            tedge = np.copy(self.edge)
+            tedge[tedge == 0] = 3 
+            matched = (tLinks == tedge).astype(np.float32)
+            size = min(self.links.sum(),self.edge.sum())
+            if (matched.sum() > size*0.2 ):
                 self.isMatched = True
-                print(links_sum,edge_sum)
             else:
                 self.isMatched = False
 

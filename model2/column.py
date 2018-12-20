@@ -32,12 +32,12 @@ class Column:
         self.matchedImg = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
         for feature in self.features:
             feature.run()
-            self.img = feature.getImg()
             self.edgeImg = feature.getEdgeImg()
             if (feature.isFixed == False):
                 self.feature_learning = True
             else:
                 self.feature_learning = False
+                self.img = self.img + feature.getImg()
             if (feature.isMatched):
                 self.matchedImg = feature.getImg()
                 self.feature_matched = True
@@ -50,7 +50,8 @@ class Column:
             self.features.append(feature)
             self.feature_learning = True
             feature.run()
-            self.img = feature.getImg()
+            if (len(self.features)==1):
+                self.img = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
             self.edgeImg = feature.getEdgeImg()
 
     def getImg(self):
