@@ -22,9 +22,8 @@ if __name__=="__main__":
         sensor.read(image)
         vision.run()
         cv2.imshow("Vision", vision.getImg())
-        cv2.imshow("Col Edge", vision.getColumnImg(3))
-        cv2.imshow("Col Feature", vision.getColumnImg(1))
-        cv2.imshow("Col Matched Feature", vision.getColumnImg(2))
+        cv2.imshow("Col Matched Feature", vision.getColumnImg("MatchedFeature"))
+        cv2.imshow("Col Predicted Feature", vision.getColumnImg("PredictedFeature"))
         if cv2.waitKey(33) >= 0:
             break
     

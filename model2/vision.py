@@ -34,19 +34,28 @@ class Vision:
         for column in self.columns:
             column.run()
         for column in self.columns:
+            column.predict()            
+        for column in self.columns:
             column.learn()
 
-    def getColumnImg(self,tp=1):      
+    def getColumnImg(self,tp="Feature"):      
         ret = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
         for x in range(self.fieldLen):
             for y in range(self.fieldLen):
-                if (tp==1): 
+                if (tp=="Feature"): 
                     ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getImg()
-                elif (tp==2):
+                elif (tp=="MatchedFeature"):
                     ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getMatchedImg()
+                elif (tp=="PredictedFeature"):
+                    ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getPredictedImg()
                 else:
                     ret[x*self.fieldSize:x*self.fieldSize+self.fieldSize,y*self.fieldSize:y*self.fieldSize+self.fieldSize] = self.columns[x*self.fieldLen+y].getEdgeImg()
-        return ret
+        retColor = np.full((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen,3),[0.0,0.0,0.0])
+        retColor[ret == 1] = [0.0  ,0.0  ,255.0]
+        retColor[ret == 10] = [0.0  ,255.0  ,0.0]
+        retColor[ret == 11] = [50.0  ,255.0  ,0.0]
+        retColor[ret == 255] = [255.0  ,0.0  ,0.0]
+        return retColor
 
     def work(self):
         sensordata = self.sensor.getOutput()

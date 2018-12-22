@@ -17,6 +17,7 @@ class Feature:
         self.isFixed = False
         self.isMatched = False
         self.isInited = False
+        self.predicted = 0
         self.learningMap = np.zeros((8,self.column.features_max))
         self.size = self.inputField.getSize()
     
@@ -69,8 +70,13 @@ class Feature:
         for i,column in enumerate(self.column.getNeighbors()):
             if (column is not None):
                 if (column.feature_matched):
-                    self.learningMap[i] = column.feature_matched_map
+                    adjust = column.feature_matched_map
+                    adjust[adjust == 0] = -0.01
+                    adjust[adjust > 0] = 0.02
+                    self.learningMap[i] = self.learningMap[i] + adjust
                     self.column.feature_matched_score = self.column.feature_matched_score + (column.feature_matched_map > 0).sum()
+        self.learningMap[self.learningMap < 0] = 0
+        self.learningMap[self.learningMap > 1] = 1
 
     def getImg(self):
         return self.links

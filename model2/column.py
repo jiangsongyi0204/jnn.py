@@ -23,14 +23,17 @@ class Column:
         self.feature_matched_score = 0
         self.feature_matched_map = np.zeros(self.features_max)
         self.feature_learning = False
+        self.neighbors = []
         self.img = []
         self.matchedImg = []
         self.edgeImg = []
-        self.neighbors = []
-    
+        self.predictedImg = []
+        
     def run(self):
         #Run input field
         self.inputField.run()
+        #Init neighbors
+        self.initNeighbors()
         #Feature match
         self.matchedImg = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
         for i,feature in enumerate(self.features):
@@ -42,13 +45,14 @@ class Column:
                 self.feature_learning = False
                 self.img = self.img + feature.getImg()
             if (feature.isMatched):
-                fixedFeature = 2*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
+                fixedFeature = 255*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
                 fixedFeature[1:-1,1:-1] = feature.getImg()[1:-1,1:-1]
                 self.matchedImg = fixedFeature
                 self.feature_matched = True
                 self.feature_matched_map[i] = 1
                 break
-            else :
+            else:
+                self.feature_matched_map[i] = 0
                 self.feature_matched = False
         #If no feature matched
         if (self.feature_matched == False and self.feature_learning == False and len(self.features) < self.features_max):
@@ -60,15 +64,30 @@ class Column:
                 self.img = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
             self.edgeImg = feature.getEdgeImg()
 
+    def predict(self):
+        self.predictedImg = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
+        maxPre = 0
+        for feature in self.features:
+            neighborMatched = []
+            for column in self.neighbors:
+                if column is not None:
+                    neighborMatched.append(column.feature_matched_map)
+                else:
+                    neighborMatched.append(np.zeros(self.features_max))
+            neighborMatched = np.array(neighborMatched)
+            feature.predicted = (feature.learningMap * neighborMatched > 0).sum()
+            if (feature.predicted > maxPre):
+                maxPre = feature.predicted
+                self.predictedImg = feature.getImg()*10
+
     def learn(self):
         if (self.feature_matched):
             for feature in self.features:
                 feature.learn()
-            print(self.name,self.feature_matched_score)
         else:
             self.feature_matched_score = 0
-
-    def getNeighbors(self):
+    
+    def initNeighbors(self):
         if (len(self.neighbors) == 0):
             self.neighbors.append(self.vision.getColumnByPos(self.vx-1,self.vy-1))
             self.neighbors.append(self.vision.getColumnByPos(self.vx,self.vy-1))
@@ -78,6 +97,8 @@ class Column:
             self.neighbors.append(self.vision.getColumnByPos(self.vx-1,self.vy+1))
             self.neighbors.append(self.vision.getColumnByPos(self.vx,self.vy+1))
             self.neighbors.append(self.vision.getColumnByPos(self.vx+1,self.vy+1))
+        
+    def getNeighbors(self):
         return self.neighbors
 
     def getImg(self):
@@ -88,5 +109,8 @@ class Column:
 
     def getEdgeImg(self):
         return self.edgeImg
+    
+    def getPredictedImg(self):
+        return self.predictedImg + self.matchedImg
 
 
