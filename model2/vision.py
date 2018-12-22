@@ -14,7 +14,7 @@ class Vision:
         self.fields = []
         self.columns = []
         self.fieldSize = 50
-        self.fieldLen = 10
+        self.fieldLen = 9
         self.data = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
         self.init()
     
@@ -33,6 +33,8 @@ class Vision:
         self.work()
         for column in self.columns:
             column.run()
+        for column in self.columns:
+            column.learn()
 
     def getColumnImg(self,tp=1):      
         ret = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
@@ -50,6 +52,11 @@ class Vision:
         sensordata = self.sensor.getOutput()
         self.data = cv2.resize(sensordata, dsize=(self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen), interpolation=cv2.INTER_LINEAR)
         #self.data = cv2.Canny(image.astype(np.uint8), 100, 200)
+
+    def getColumnByPos(self,x,y):
+        if (x < 0 or x >= self.fieldLen or y < 0 or y >= self.fieldLen):
+            return None
+        return self.columns[x*self.fieldLen+y]
 
     def getImg(self):
         return self.data

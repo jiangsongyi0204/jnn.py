@@ -17,6 +17,7 @@ class Feature:
         self.isFixed = False
         self.isMatched = False
         self.isInited = False
+        self.learningMap = np.zeros((8,self.column.features_max))
         self.size = self.inputField.getSize()
     
     def init(self):
@@ -64,13 +65,15 @@ class Feature:
             else:
                 self.isMatched = False
 
+    def learn(self):
+        for i,column in enumerate(self.column.getNeighbors()):
+            if (column is not None):
+                if (column.feature_matched):
+                    self.learningMap[i] = column.feature_matched_map
+                    self.column.feature_matched_score = self.column.feature_matched_score + (column.feature_matched_map > 0).sum()
+
     def getImg(self):
-        if (self.isFixed == False):          
-            return self.links
-        else:
-            fixedFeature = 2*np.ones((self.size, self.size), dtype = int)
-            fixedFeature[1:-1,1:-1] = self.links[1:-1,1:-1]
-            return fixedFeature
+        return self.links
     
     def getEdgeImg(self):
         return self.edge

@@ -20,17 +20,20 @@ class Column:
         self.features = []              #Features
         self.features_max = 1
         self.feature_matched = False
+        self.feature_matched_score = 0
+        self.feature_matched_map = np.zeros(self.features_max)
         self.feature_learning = False
         self.img = []
         self.matchedImg = []
         self.edgeImg = []
+        self.neighbors = []
     
     def run(self):
         #Run input field
         self.inputField.run()
         #Feature match
         self.matchedImg = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
-        for feature in self.features:
+        for i,feature in enumerate(self.features):
             feature.run()
             self.edgeImg = feature.getEdgeImg()
             if (feature.isFixed == False):
@@ -39,8 +42,11 @@ class Column:
                 self.feature_learning = False
                 self.img = self.img + feature.getImg()
             if (feature.isMatched):
-                self.matchedImg = feature.getImg()
+                fixedFeature = 2*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
+                fixedFeature[1:-1,1:-1] = feature.getImg()[1:-1,1:-1]
+                self.matchedImg = fixedFeature
                 self.feature_matched = True
+                self.feature_matched_map[i] = 1
                 break
             else :
                 self.feature_matched = False
@@ -53,6 +59,26 @@ class Column:
             if (len(self.features)==1):
                 self.img = np.zeros((self.inputField.visionSize,self.inputField.visionSize))
             self.edgeImg = feature.getEdgeImg()
+
+    def learn(self):
+        if (self.feature_matched):
+            for feature in self.features:
+                feature.learn()
+            print(self.name,self.feature_matched_score)
+        else:
+            self.feature_matched_score = 0
+
+    def getNeighbors(self):
+        if (len(self.neighbors) == 0):
+            self.neighbors.append(self.vision.getColumnByPos(self.vx-1,self.vy-1))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx,self.vy-1))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx+1,self.vy-1))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx-1,self.vy))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx+1,self.vy))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx-1,self.vy+1))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx,self.vy+1))
+            self.neighbors.append(self.vision.getColumnByPos(self.vx+1,self.vy+1))
+        return self.neighbors
 
     def getImg(self):
         return self.img
