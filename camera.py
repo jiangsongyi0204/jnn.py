@@ -21,8 +21,8 @@ if __name__=="__main__":
         #cv2.imshow("Edge", result)
         sensor.read(image)
         vision.run()
+        cv2.imshow("Sensor", cv2.resize(image, dsize=(400,400), interpolation=cv2.INTER_LINEAR))
         cv2.imshow("Vision", vision.getImg())
-        cv2.imshow("Col Matched Feature", vision.getColumnImg("MatchedFeature"))
         cv2.imshow("Col Predicted Feature", vision.getColumnImg("PredictedFeature"))
         if cv2.waitKey(33) >= 0:
             break

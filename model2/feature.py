@@ -24,7 +24,8 @@ class Feature:
     def init(self):
         self.isFixed = False
         self.isMatched = False
-        self.links = np.random.uniform(low=0, high=0.7, size=(self.size,self.size))
+        #self.links = np.random.uniform(low=0, high=0.7, size=(self.size,self.size))
+        self.links = np.full((self.size,self.size),0.5)
         self.isInited = True
 
     def run(self):
@@ -71,10 +72,13 @@ class Feature:
             if (column is not None):
                 if (column.feature_matched):
                     adjust = column.feature_matched_map
-                    adjust[adjust == 0] = -0.01
-                    adjust[adjust > 0] = 0.02
+                    if (self.isMatched):                    
+                        adjust[adjust == 0] = -0.01
+                        adjust[adjust > 0] = 0.02
+                    else: 
+                        adjust[adjust > 0] = -0.001
                     self.learningMap[i] = self.learningMap[i] + adjust
-                    self.column.feature_matched_score = self.column.feature_matched_score + (column.feature_matched_map > 0).sum()
+                    #self.column.feature_matched_score = self.column.feature_matched_score + (column.feature_matched_map > 0).sum()
         self.learningMap[self.learningMap < 0] = 0
         self.learningMap[self.learningMap > 1] = 1
 

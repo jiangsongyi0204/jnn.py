@@ -45,9 +45,10 @@ class Column:
                 self.feature_learning = False
                 self.img = self.img + feature.getImg()
             if (feature.isMatched):
-                fixedFeature = 255*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
-                fixedFeature[1:-1,1:-1] = feature.getImg()[1:-1,1:-1]
-                self.matchedImg = fixedFeature
+                #fixedFeature = 255*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
+                #fixedFeature[1:-1,1:-1] = feature.getImg()[1:-1,1:-1]
+                #self.matchedImg = fixedFeature
+                self.matchedImg = feature.getImg()
                 self.feature_matched = True
                 self.feature_matched_map[i] = 1
                 break
@@ -78,13 +79,14 @@ class Column:
             feature.predicted = (feature.learningMap * neighborMatched > 0).sum()
             if (feature.predicted > maxPre):
                 maxPre = feature.predicted
-                self.predictedImg = feature.getImg()*10
+                borderFeature = 255*np.ones((self.inputField.getSize(), self.inputField.getSize()), dtype = int)
+                borderFeature[1:-1,1:-1] = feature.getImg()[1:-1,1:-1]*10
+                self.predictedImg = borderFeature
 
     def learn(self):
-        if (self.feature_matched):
-            for feature in self.features:
-                feature.learn()
-        else:
+        for feature in self.features:
+            feature.learn()       
+        if (self.feature_matched == False) :
             self.feature_matched_score = 0
     
     def initNeighbors(self):

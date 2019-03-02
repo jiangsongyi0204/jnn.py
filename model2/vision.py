@@ -13,8 +13,8 @@ class Vision:
         self.window = 0
         self.fields = []
         self.columns = []
-        self.fieldSize = 50
-        self.fieldLen = 9
+        self.fieldSize = 40
+        self.fieldLen = 10
         self.data = np.zeros((self.fieldSize*self.fieldLen,self.fieldSize*self.fieldLen))
         self.init()
     
